@@ -2,59 +2,43 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-export default function Minigames() {
+export default function Shop() {
     const navigation = useNavigation();
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>🎮 Minigames</Text>
-            <Text style={styles.subtitle}>Choose your space adventure!</Text>
+            <Text style={styles.title}>🛒 Shop</Text>
+            <Text style={styles.subtitle}>Upgrade your space gear!</Text>
 
-            <View style={styles.gamesContainer}>
-                <TouchableOpacity style={styles.gameCard}>
-                    <Text style={styles.gameIcon}>🚀</Text>
-                    <Text style={styles.gameTitle}>Space Race</Text>
-                    <Text style={styles.gameDescription}>Navigate through asteroid fields</Text>
+            <View style={styles.currencyContainer}>
+                <Text style={styles.currency}>💰 1,250 Space Coins</Text>
+            </View>
+
+            <View style={styles.shopContainer}>
+                <TouchableOpacity style={styles.shopItem}>
+                    <Text style={styles.itemIcon}>🚀</Text>
+                    <Text style={styles.itemName}>Rocket Booster</Text>
+                    <Text style={styles.itemPrice}>500 coins</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.gameCard}>
-                    <Text style={styles.gameIcon}>⭐</Text>
-                    <Text style={styles.gameTitle}>Star Collector</Text>
-                    <Text style={styles.gameDescription}>Gather cosmic energy</Text>
+                <TouchableOpacity style={styles.shopItem}>
+                    <Text style={styles.itemIcon}>🛡️</Text>
+                    <Text style={styles.itemName}>Shield Generator</Text>
+                    <Text style={styles.itemPrice}>750 coins</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.gameCard}>
-                    <Text style={styles.gameIcon}>🛸</Text>
-                    <Text style={styles.gameTitle}>Alien Encounter</Text>
-                    <Text style={styles.gameDescription}>Meet friendly aliens</Text>
+                <TouchableOpacity style={styles.shopItem}>
+                    <Text style={styles.itemIcon}>⚡</Text>
+                    <Text style={styles.itemName}>Energy Core</Text>
+                    <Text style={styles.itemPrice}>300 coins</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.shopItem}>
+                    <Text style={styles.itemIcon}>🎨</Text>
+                    <Text style={styles.itemName}>Paint Job</Text>
+                    <Text style={styles.itemPrice}>200 coins</Text>
                 </TouchableOpacity>
             </View>
 
-            {/* Bottom Navigation Bar */}
-            <View style={styles.navbar}>
-                <TouchableOpacity
-                    style={[styles.navItem, styles.activeNavItem]}
-                    onPress={() => navigation.navigate('Minigames')}
-                >
-                    <Text style={styles.navIcon}>🎮</Text>
-                    <Text style={styles.navLabel}>Minigames</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Avatar')}
-                >
-                    <Text style={styles.navIcon}>👤</Text>
-                    <Text style={styles.navLabel}>Avatar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Shop')}
-                >
-                    <Text style={styles.navIcon}>🛒</Text>
-                    <Text style={styles.navLabel}>Shop</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }
@@ -77,35 +61,50 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#60359c',
         textAlign: 'center',
+        marginBottom: 20,
+    },
+    currencyContainer: {
+        alignItems: 'center',
         marginBottom: 30,
     },
-    gamesContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        gap: 20,
+    currency: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#60359c',
+        backgroundColor: 'rgba(96, 53, 156, 0.2)',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#60359c',
     },
-    gameCard: {
+    shopContainer: {
+        flex: 1,
+        gap: 15,
+    },
+    shopItem: {
         backgroundColor: 'rgba(96, 53, 156, 0.2)',
         borderRadius: 15,
         padding: 20,
+        flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#60359c',
     },
-    gameIcon: {
-        fontSize: 40,
-        marginBottom: 10,
+    itemIcon: {
+        fontSize: 30,
+        marginRight: 15,
     },
-    gameTitle: {
-        fontSize: 18,
+    itemName: {
+        flex: 1,
+        fontSize: 16,
         fontWeight: 'bold',
         color: '#fff',
-        marginBottom: 5,
     },
-    gameDescription: {
+    itemPrice: {
         fontSize: 14,
-        color: '#ccc',
-        textAlign: 'center',
+        color: '#60359c',
+        fontWeight: '600',
     },
     navbar: {
         position: 'absolute',

@@ -262,32 +262,6 @@ export default function HomePage({ route }) {
                 )}
             </ScrollView>
 
-            {/* Bottom Navigation Bar */}
-            <View style={styles.navbar}>
-                <TouchableOpacity
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Minigames')}
-                >
-                    <Text style={styles.navIcon}>🎮</Text>
-                    <Text style={styles.navLabel}>Minigames</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Avatar')}
-                >
-                    <Text style={styles.navIcon}>👤</Text>
-                    <Text style={styles.navLabel}>Avatar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Shop')}
-                >
-                    <Text style={styles.navIcon}>🛒</Text>
-                    <Text style={styles.navLabel}>Shop</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }

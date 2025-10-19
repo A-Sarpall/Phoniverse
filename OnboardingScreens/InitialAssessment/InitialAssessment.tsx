@@ -50,7 +50,7 @@ const InitialAssessment = ({navigation}: any) => {
                 <TouchableOpacity
                     style={[styles.micButton, { backgroundColor: circleColor }]}
                     activeOpacity={0.8}
-                    onPress={() => {navigation.navigate("Home")}}
+                    onPress={() => {navigation.replace("MainTabs")}}
                 >
                     <FontAwesomeIcon icon={faMicrophone} size={80} color="white" />
                 </TouchableOpacity>
