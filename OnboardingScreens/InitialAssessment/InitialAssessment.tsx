@@ -6,9 +6,9 @@ import { ThemeContext } from "../../App";
 import { stringsToPronounce } from "../../sentences/onboardingSentences";
 import { styles } from "./InitialAssessment.style";
 import useInitialAssessment from "./useInitialAssessment";
-import { analyzeRecording, createVoiceClone } from "./InitialAssessment.service";
+import { createVoiceClone } from "./InitialAssessment.service";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {ElevenLabsClient} from "@elevenlabs/elevenlabs-js";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
@@ -19,41 +19,80 @@ const InitialAssessment = ({ navigation }: any) => {
         record,
         stopRecording,
         resetRecording,
+        recordingUri,
+        setIsLoading,
+        isLoading,
     } = useInitialAssessment();
 
     const circleColor = "#2c1743";
 
     const handleBottomButtonPress = async () => {
         if (isRecording) {
+            // 🟥 Stop recording
             const uri = await stopRecording();
-            console.log("Recorded audio URI:", uri);
-
-            try {
-                const cloneResult = await createVoiceClone(uri!, "userClone", "User's custom voice clone");
-                console.log("Voice ID:", cloneResult);
-            } catch (err) {
-                console.error(err);
+            console.log("Finished recording, saved URI:", uri);
+        } else if (isDoneRecording) {
+            // 🟩 Done recording → Upload to clone
+            if (!recordingUri) {
+                console.warn("No recording found!");
+                return;
             }
 
-        } else if (isDoneRecording) {
-            navigation.replace("DoneRecording");
+            try {
+                setIsLoading(true);
+                console.log("Uploading to create voice clone...");
+
+                const cloneResult = await createVoiceClone(
+                    recordingUri,
+                    "userClone",
+                    "User's custom voice clone"
+                );
+
+                console.log("Voice clone created:", cloneResult);
+
+                // ✅ Extract and persist the voice ID
+                const voiceId = cloneResult?.id || cloneResult?.voice_id;
+                if (voiceId) {
+                    await AsyncStorage.setItem("userVoiceId", voiceId);
+                    console.log("Stored voice ID:", voiceId);
+                } else {
+                    console.warn("No voice ID returned from server");
+                }
+
+                // ✅ Mark onboarding complete
+                await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+
+                setIsLoading(false);
+                navigation.replace("MainTabs");
+            } catch (err) {
+                console.error("Error creating voice clone:", err);
+                setIsLoading(false);
+            }
         } else {
+            // 🟦 Start recording
             await record();
         }
     };
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView
+            style={[styles.container, { backgroundColor: theme.background }]}
+        >
             <View style={styles.topContainer}>
-                <Text style={styles.instructionText}>Repeat this phrase loud and clear!: </Text>
-                <Text style={styles.sentenceText}>"{stringsToPronounce[0]}"</Text>
+                <Text style={styles.instructionText}>
+                    Repeat this phrase loud and clear!:
+                </Text>
+                <Text style={styles.sentenceText}>
+                    "{stringsToPronounce[0]}"
+                </Text>
             </View>
 
             <View style={styles.middleContainer}>
                 <TouchableOpacity
                     style={[styles.micButton, { backgroundColor: circleColor }]}
                     activeOpacity={0.8}
-                    onPress={() => navigation.replace("MainTabs")}
+                    onPress={handleBottomButtonPress}
+                    disabled={isLoading}
                 >
                     <FontAwesomeIcon icon={faMicrophone} size={80} color="white" />
                 </TouchableOpacity>
@@ -61,21 +100,35 @@ const InitialAssessment = ({ navigation }: any) => {
 
             <View style={styles.bottomContainer}>
                 <TouchableOpacity
-                    style={[styles.button, { backgroundColor: theme.button }]}
+                    style={[
+                        styles.button,
+                        { backgroundColor: isLoading ? "#999" : theme.button },
+                    ]}
                     onPress={handleBottomButtonPress}
+                    disabled={isLoading}
                 >
                     <Text style={styles.buttonText}>
-                        {isRecording ? "Recording" : isDoneRecording ? "Done" : "Record"}
+                        {isLoading
+                            ? "Loading..."
+                            : isRecording
+                                ? "Finish Recording"
+                                : isDoneRecording
+                                    ? "Done"
+                                    : "Record"}
                     </Text>
                 </TouchableOpacity>
 
                 {isDoneRecording && (
                     <TouchableOpacity
-                        style={[styles.button, { backgroundColor: "none", marginTop: 12 }]}
+                        style={[
+                            styles.button,
+                            { backgroundColor: "transparent", marginTop: 12 },
+                        ]}
                         onPress={() => {
                             resetRecording();
                             void record();
                         }}
+                        disabled={isLoading}
                     >
                         <Text style={styles.buttonText}>Retake</Text>
                     </TouchableOpacity>

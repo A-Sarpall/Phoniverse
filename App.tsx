@@ -1,11 +1,11 @@
-import React, { createContext } from "react";
+import React, {createContext, useEffect, useState} from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import MainTabs from "./MainTabs";
-import Game from "./Screens/Game/Game"; // 👈 import your Game screen
+import AsyncStorage from "@react-native-async-storage/async-storage"; // 👈 import your Game screen
 
 const Stack = createNativeStackNavigator();
 
@@ -27,13 +27,25 @@ export default function App() {
         text: "#fff",
         button: "#60359c",
     };
+    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            const value = await AsyncStorage.getItem("hasCompletedOnboarding");
+            setHasCompletedOnboarding(value === "true");
+        })();
+    }, []);
+
+    if (hasCompletedOnboarding === null) {
+        return null;
+    }
 
     return (
         <ThemeContext.Provider value={theme}>
             <NavigationContainer>
                 <StatusBar barStyle="light-content" />
                 <Stack.Navigator
-                    initialRouteName="Welcome"
+                    initialRouteName={hasCompletedOnboarding ? 'MainTabs' : 'Welcome'}
                     screenOptions={{
                         headerStyle: { backgroundColor: "#392059" },
                         headerTitleStyle: { color: "#fff" },
