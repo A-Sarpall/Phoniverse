@@ -11,7 +11,7 @@ const useWelcome = (navigation: any) => {
             const { status } = await Audio.requestPermissionsAsync();
 
             if (status === "granted") {
-                navigation.navigate("Initial Assessment");
+                navigation.replace("Initial Assessment");
             } else {
                 Alert.alert(
                     "Permission Required",

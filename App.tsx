@@ -1,9 +1,11 @@
 import React, { createContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
-import {StatusBar} from "react-native";
+import { StatusBar } from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
+import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
+import MainTabs from "./MainTabs";
+import Game from "./Screens/Game/Game"; // 👈 import your Game screen
 
 const Stack = createNativeStackNavigator();
 
@@ -29,10 +31,39 @@ export default function App() {
     return (
         <ThemeContext.Provider value={theme}>
             <NavigationContainer>
-                <StatusBar barStyle='light-content' />
-                <Stack.Navigator initialRouteName="Welcome">
-                    <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
-                    <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
+                <StatusBar barStyle="light-content" />
+                <Stack.Navigator
+                    initialRouteName="Welcome"
+                    screenOptions={{
+                        headerStyle: { backgroundColor: "#392059" },
+                        headerTitleStyle: { color: "#fff" },
+                        headerTintColor: "#fff",
+                    }}
+                >
+                    <Stack.Screen
+                        name="Welcome"
+                        component={Welcome}
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="Initial Assessment"
+                        component={InitialAssessment}
+                        options={{ title: "Initial Assessment" }}
+                    />
+
+                    {/* 🧭 Main app (tab navigation) */}
+                    <Stack.Screen
+                        name="MainTabs"
+                        component={MainTabs}
+                        options={{ headerShown: false }}
+                    />
+
+                    {/* 🚀 Full-screen Game screen (no tab bar) */}
+                    <Stack.Screen
+                        name="Game"
+                        component={Game}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeContext.Provider>
