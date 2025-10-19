@@ -6,14 +6,12 @@ import {
     faGamepad,
     faUser,
     faStore,
-    faPlay,
 } from "@fortawesome/free-solid-svg-icons";
-import {ThemeContext} from "./App";
+import { ThemeContext } from "./App";
 import HomePage from "./Screens/Home/Home";
 import Minigames from "./Screens/Minigames/Minigames";
 import Avatar from "./Screens/Avatar/Avatar";
 import Shop from "./Screens/Shop/Shop";
-import Game from "./Screens/Game/Game";
 
 const Tab = createBottomTabNavigator();
 
@@ -62,15 +60,6 @@ const MainTabs = () => {
                 options={{
                     tabBarIcon: ({ color }) => (
                         <FontAwesomeIcon icon={faStore} size={20} color={color} />
-                    ),
-                }}
-            />
-            <Tab.Screen
-                name="Game"
-                component={Game}
-                options={{
-                    tabBarIcon: ({ color }) => (
-                        <FontAwesomeIcon icon={faPlay} size={20} color={color} />
                     ),
                 }}
             />

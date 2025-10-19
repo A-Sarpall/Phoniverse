@@ -5,6 +5,7 @@ import { StatusBar } from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import MainTabs from "./MainTabs";
+import Game from "./Screens/Game/Game"; // 👈 import your Game screen
 
 const Stack = createNativeStackNavigator();
 
@@ -36,9 +37,9 @@ export default function App() {
                     screenOptions={{
                         headerStyle: { backgroundColor: "#392059" },
                         headerTitleStyle: { color: "#fff" },
+                        headerTintColor: "#fff",
                     }}
                 >
-                    {/* Onboarding flow */}
                     <Stack.Screen
                         name="Welcome"
                         component={Welcome}
@@ -50,11 +51,18 @@ export default function App() {
                         options={{ title: "Initial Assessment" }}
                     />
 
-                    {/* Main app (tab navigation) */}
+                    {/* 🧭 Main app (tab navigation) */}
                     <Stack.Screen
                         name="MainTabs"
                         component={MainTabs}
                         options={{ headerShown: false }}
+                    />
+
+                    {/* 🚀 Full-screen Game screen (no tab bar) */}
+                    <Stack.Screen
+                        name="Game"
+                        component={Game}
+                        options={{ headerShown: false, gestureEnabled: false }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
