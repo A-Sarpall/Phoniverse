@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import {StatusBar} from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
+import HomePage from "./OnboardingScreens/Home/home";
 
 const Stack = createNativeStackNavigator();
 
@@ -33,6 +34,7 @@ export default function App() {
                 <Stack.Navigator initialRouteName="Welcome">
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
+                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeContext.Provider>
