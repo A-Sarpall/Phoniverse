@@ -30,8 +30,11 @@ const useWelcome = (navigation: any) => {
 
     const handleDone = async () => {
         try {
-            await AsyncStorage.setItem("hasCompletedOnboarding", "true");
-            navigation.replace("MainTabs");
+            await AsyncStorage.getItem("hasCompletedOnboarding").then((result) => {
+                if (result) {
+                    navigation.replace("MainTabs");
+                }
+            });
         } catch (error) {
             console.error("Error saving onboarding status:", error);
         }
@@ -39,7 +42,7 @@ const useWelcome = (navigation: any) => {
 
     return {
         handleGetStarted,
-        handleDone,
+        // handleDone,
         theme,
     };
 };
