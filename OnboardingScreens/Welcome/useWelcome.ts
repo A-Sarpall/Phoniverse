@@ -30,11 +30,13 @@ const useWelcome = (navigation: any) => {
 
     const handleDone = async () => {
         try {
-            await AsyncStorage.getItem("hasCompletedOnboarding").then((result) => {
-                if (result) {
-                    navigation.replace("MainTabs");
+            await AsyncStorage.getItem("hasCompletedOnboarding").then(
+                (result) => {
+                    if (result) {
+                        navigation.replace("MainTabs");
+                    }
                 }
-            });
+            );
         } catch (error) {
             console.error("Error saving onboarding status:", error);
         }

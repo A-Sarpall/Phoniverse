@@ -1,4 +1,4 @@
-import {Platform} from "react-native";
+import { Platform } from "react-native";
 
 const SERVER_URL = "https://b4bf81dc1c06.ngrok-free.app";
 
@@ -7,10 +7,19 @@ const createFileObject = (uri: string, name: string, type: string) => {
     return { uri: fileUri, name, type } as any;
 };
 
-export const analyzeRecording = async (recordedUri: string, truthUri: string) => {
+export const analyzeRecording = async (
+    recordedUri: string,
+    truthUri: string
+) => {
     const formData = new FormData();
-    formData.append("truth_audio", createFileObject(truthUri, "truth_audio.wav", "audio/wav"));
-    formData.append("recorded_audio", createFileObject(recordedUri, "recorded_audio.wav", "audio/wav"));
+    formData.append(
+        "truth_audio",
+        createFileObject(truthUri, "truth_audio.wav", "audio/wav")
+    );
+    formData.append(
+        "recorded_audio",
+        createFileObject(recordedUri, "recorded_audio.wav", "audio/wav")
+    );
 
     const response = await fetch(`${SERVER_URL}/analyze`, {
         method: "POST",
@@ -23,6 +32,24 @@ export const analyzeRecording = async (recordedUri: string, truthUri: string) =>
     }
 
     return response.json();
+};
+
+export const createTrainerVoice = async (text: string) => {
+    const formData = new FormData();
+    formData.append("text", text);
+
+    const response = await fetch(`${SERVER_URL}/tts/generate`, {
+        method: "POST",
+        body: formData,
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server error: ${errorText}`);
+    }
+
+    // Return audio blob
+    return response.blob();
 };
 
 export const createVoiceClone = async (
@@ -38,7 +65,10 @@ export const createVoiceClone = async (
     formData.append("description", description);
 
     formData.append("audio_file", {
-        uri: Platform.OS === "ios" ? recordedUri.replace("file://", "") : recordedUri,
+        uri:
+            Platform.OS === "ios"
+                ? recordedUri.replace("file://", "")
+                : recordedUri,
         name: "recorded_audio.wav",
         type: "audio/wav",
     } as any);
@@ -57,4 +87,3 @@ export const createVoiceClone = async (
 
     return JSON.parse(text);
 };
-

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
@@ -6,9 +6,13 @@ import { ThemeContext } from "../../App";
 import { stringsToPronounce } from "../../sentences/onboardingSentences";
 import { styles } from "./InitialAssessment.style";
 import useInitialAssessment from "./useInitialAssessment";
-import { createVoiceClone } from "./InitialAssessment.service";
+import {
+    createVoiceClone,
+    createTrainerVoice,
+} from "./InitialAssessment.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Audio } from "expo-av";
 
 const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
@@ -25,6 +29,39 @@ const InitialAssessment = ({ navigation }: any) => {
     } = useInitialAssessment();
 
     const circleColor = "#2c1743";
+
+    // Generate and play trainer voice on component mount
+    useEffect(() => {
+        const generateAndPlayTrainerVoice = async () => {
+            try {
+                console.log(
+                    "Generating trainer voice for:",
+                    stringsToPronounce[0]
+                );
+
+                const audioBlob = await createTrainerVoice(
+                    "Repeat this phrase loud and clear!:" + stringsToPronounce[0]
+                );
+
+                // Convert blob to base64 and play
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result as string;
+                    const sound = new Audio.Sound();
+
+                    await sound.loadAsync({ uri: base64Audio });
+                    await sound.playAsync();
+
+                    console.log("Trainer voice played successfully");
+                };
+                reader.readAsDataURL(audioBlob);
+            } catch (error) {
+                console.error("Failed to generate/play trainer voice:", error);
+            }
+        };
+
+        generateAndPlayTrainerVoice();
+    }, []);
 
     const handleBottomButtonPress = async () => {
         if (isRecording) {
@@ -94,7 +131,11 @@ const InitialAssessment = ({ navigation }: any) => {
                     onPress={handleBottomButtonPress}
                     disabled={isLoading}
                 >
-                    <FontAwesomeIcon icon={faMicrophone} size={80} color="white" />
+                    <FontAwesomeIcon
+                        icon={faMicrophone}
+                        size={80}
+                        color="white"
+                    />
                 </TouchableOpacity>
             </View>
 
@@ -111,10 +152,10 @@ const InitialAssessment = ({ navigation }: any) => {
                         {isLoading
                             ? "Loading..."
                             : isRecording
-                                ? "Finish Recording"
-                                : isDoneRecording
-                                    ? "Done"
-                                    : "Record"}
+                            ? "Finish Recording"
+                            : isDoneRecording
+                            ? "Done"
+                            : "Record"}
                     </Text>
                 </TouchableOpacity>
 
