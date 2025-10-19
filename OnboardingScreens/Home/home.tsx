@@ -1,8 +1,16 @@
-import React, { useState, useRef, useMemo, useContext } from 'react';
-import { View, ScrollView, Image, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import Svg, { Line, Circle } from 'react-native-svg';
-import { PointsContext } from '../../App';
+import React, { useState, useRef, useMemo, useContext } from "react";
+import {
+    View,
+    ScrollView,
+    Image,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Animated,
+} from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import Svg, { Line, Circle } from "react-native-svg";
+import { PointsContext } from "../../App";
 
 export default function HomePage({ route, navigation }: any) {
     const [completedPlanets, setCompletedPlanets] = useState(new Set());
@@ -21,11 +29,11 @@ export default function HomePage({ route, navigation }: any) {
     const scrollViewRef = useRef<ScrollView>(null);
 
     const images = [
-        { source: require('../../assets/planet1.png'), number: 1 },
-        { source: require('../../assets/asteroid1.png'), number: 2 },
-        { source: require('../../assets/planet2.png'), number: 3 },
-        { source: require('../../assets/asteroid2.png'), number: 4 },
-        { source: require('../../assets/planet3.png'), number: 5 },
+        { source: require("../../assets/planet1.png"), number: 1 },
+        { source: require("../../assets/asteroid1.png"), number: 2 },
+        { source: require("../../assets/planet2.png"), number: 3 },
+        { source: require("../../assets/asteroid2.png"), number: 4 },
+        { source: require("../../assets/planet3.png"), number: 5 },
     ];
 
     const stars = useMemo(() => {
@@ -37,47 +45,67 @@ export default function HomePage({ route, navigation }: any) {
                 y: Math.random() * 1200,
                 size: Math.random() * 2 + 1, // larger stars (1–4 px)
                 opacity: Math.random() * 0.6 + 0.4, // generally brighter (0.4–1)
-                color: Math.random() > 0.7 ? '#cce6ff' : '#ffffff', // some bluish sparkle
+                color: Math.random() > 0.7 ? "#cce6ff" : "#ffffff", // some bluish sparkle
             });
         }
         return arr;
     }, []);
-
 
     // Planet positions (zig-zag)
     const imagePositions = images.map((item, index) => {
         const screenWidth = 300;
         const imageSize = 150;
         const offset = 50;
-        const x = index % 2 === 0 ? 20 + offset : screenWidth - imageSize - 20 + offset;
+        const x =
+            index % 2 === 0
+                ? 20 + offset
+                : screenWidth - imageSize - 20 + offset;
         const y = (images.length - 1 - index) * 200 + 50;
         return { ...item, x, y };
     });
 
     useFocusEffect(
         React.useCallback(() => {
-            if (route?.params?.completedPlanet && !processedPlanets.has(route.params.completedPlanet)) {
-                // Mark this planet as processed to prevent duplicate processing
-                setProcessedPlanets(prev => {
+            console.log("🏠 Home screen focused with params:", route?.params);
+
+            // Check if we're coming back from a game screen
+            const completedFromParam = route?.params?.completedPlanet;
+
+            // If we have a completedPlanet param, it means we came from the game screen
+            // Progress the level immediately
+            if (
+                completedFromParam &&
+                !processedPlanets.has(completedFromParam)
+            ) {
+                console.log(
+                    `✅ Progressing level for planet ${completedFromParam} (came from game screen)`
+                );
+
+                // Mark as processed
+                setProcessedPlanets((prev) => {
                     const updated = new Set(prev);
-                    updated.add(route.params.completedPlanet);
+                    updated.add(completedFromParam);
                     return updated;
                 });
 
-                setCompletedPlanets(prev => {
+                setCompletedPlanets((prev) => {
                     const updated = new Set(prev);
-                    updated.add(route.params.completedPlanet);
+                    updated.add(completedFromParam);
                     return updated;
                 });
 
                 // Add points: 30 * level number
-                const pointsEarned = 30 * route.params.completedPlanet;
+                const pointsEarned = 30 * completedFromParam;
                 addPoints(pointsEarned);
 
-                const nextPosition = route.params.completedPlanet + 1;
+                const nextPosition = completedFromParam + 1;
                 if (nextPosition <= 5) {
-                    const currentPlanetIndex = images.findIndex(img => img.number === route.params.completedPlanet);
-                    const nextPlanetIndex = images.findIndex(img => img.number === nextPosition);
+                    const currentPlanetIndex = images.findIndex(
+                        (img) => img.number === completedFromParam
+                    );
+                    const nextPlanetIndex = images.findIndex(
+                        (img) => img.number === nextPosition
+                    );
 
                     if (currentPlanetIndex !== -1 && nextPlanetIndex !== -1) {
                         const screenWidth = 300;
@@ -85,14 +113,24 @@ export default function HomePage({ route, navigation }: any) {
                         const spaceshipSize = 60;
                         const offset = 50;
 
-                        const currentX = currentPlanetIndex % 2 === 0 ? 20 + offset : screenWidth - planetSize - 20 + offset;
-                        const currentY = (images.length - 1 - currentPlanetIndex) * 200 + 50;
-                        const nextX = nextPlanetIndex % 2 === 0 ? 20 + offset : screenWidth - planetSize - 20 + offset;
-                        const nextY = (images.length - 1 - nextPlanetIndex) * 200 + 50;
+                        const currentX =
+                            currentPlanetIndex % 2 === 0
+                                ? 20 + offset
+                                : screenWidth - planetSize - 20 + offset;
+                        const currentY =
+                            (images.length - 1 - currentPlanetIndex) * 200 + 50;
+                        const nextX =
+                            nextPlanetIndex % 2 === 0
+                                ? 20 + offset
+                                : screenWidth - planetSize - 20 + offset;
+                        const nextY =
+                            (images.length - 1 - nextPlanetIndex) * 200 + 50;
 
-                        const currentCenterX = currentX + planetSize / 2 - spaceshipSize / 2;
+                        const currentCenterX =
+                            currentX + planetSize / 2 - spaceshipSize / 2;
                         const currentCenterY = currentY - 30;
-                        const nextCenterX = nextX + planetSize / 2 - spaceshipSize / 2;
+                        const nextCenterX =
+                            nextX + planetSize / 2 - spaceshipSize / 2;
                         const nextCenterY = nextY - 30;
 
                         setIsSpaceshipTravelling(true);
@@ -115,27 +153,38 @@ export default function HomePage({ route, navigation }: any) {
                         const progress = new Animated.Value(0);
                         const shouldDisappearMidway = Math.random() > 0.5;
 
-                        const curveAnimation = progress.addListener(({ value }) => {
-                            const t = value;
-                            const x = currentCenterX + (nextCenterX - currentCenterX) * t;
-                            const y = currentCenterY + (nextCenterY - currentCenterY) * t - 100 * Math.sin(t * Math.PI);
+                        const curveAnimation = progress.addListener(
+                            ({ value }) => {
+                                const t = value;
+                                const x =
+                                    currentCenterX +
+                                    (nextCenterX - currentCenterX) * t;
+                                const y =
+                                    currentCenterY +
+                                    (nextCenterY - currentCenterY) * t -
+                                    100 * Math.sin(t * Math.PI);
 
-                            spaceshipX.setValue(x);
-                            spaceshipY.setValue(y);
+                                spaceshipX.setValue(x);
+                                spaceshipY.setValue(y);
 
-                            if (shouldDisappearMidway && t > 0.4 && t < 0.6) {
-                                spaceshipOpacity.setValue(0.2);
-                            } else {
-                                spaceshipOpacity.setValue(1);
+                                if (
+                                    shouldDisappearMidway &&
+                                    t > 0.4 &&
+                                    t < 0.6
+                                ) {
+                                    spaceshipOpacity.setValue(0.2);
+                                } else {
+                                    spaceshipOpacity.setValue(1);
+                                }
+
+                                if (scrollViewRef.current) {
+                                    scrollViewRef.current.scrollTo({
+                                        y: Math.max(0, y - 200),
+                                        animated: false,
+                                    });
+                                }
                             }
-
-                            if (scrollViewRef.current) {
-                                scrollViewRef.current.scrollTo({
-                                    y: Math.max(0, y - 200),
-                                    animated: false,
-                                });
-                            }
-                        });
+                        );
 
                         Animated.sequence([
                             Animated.parallel([
@@ -190,7 +239,12 @@ export default function HomePage({ route, navigation }: any) {
                     }
                 }
             }
-        }, [route?.params?.completedPlanet, processedPlanets, addPoints])
+        }, [
+            route?.params,
+            currentSpaceshipPosition,
+            processedPlanets,
+            addPoints,
+        ])
     );
 
     const starScale = starIntensity.interpolate({
@@ -209,22 +263,31 @@ export default function HomePage({ route, navigation }: any) {
                 style={styles.scrollView}
                 contentContainerStyle={styles.scrollContent}
                 ref={scrollViewRef}
-                onLayout={() => setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: false }), 100)}
+                onLayout={() =>
+                    setTimeout(
+                        () =>
+                            scrollViewRef.current?.scrollToEnd({
+                                animated: false,
+                            }),
+                        100
+                    )
+                }
             >
                 <Svg style={styles.svgOverlay}>
                     {/* Animated starfield */}
-                    {stars.map(star => (
+                    {stars.map((star) => (
                         <AnimatedCircle
                             key={star.id}
                             cx={star.x}
                             cy={star.y}
                             r={Animated.multiply(star.size, starScale)}
                             fill="#ffffff"
-                            opacity={Animated.multiply(star.opacity, starOpacity)}
+                            opacity={Animated.multiply(
+                                star.opacity,
+                                starOpacity
+                            )}
                         />
                     ))}
-
-
 
                     {/* Connecting lines */}
                     {imagePositions.map((item, i) => {
@@ -248,48 +311,63 @@ export default function HomePage({ route, navigation }: any) {
                 </Svg>
 
                 {/* Planets */}
-                {imagePositions.map(item => (
-                    <View key={item.number} style={[styles.imageContainer, { left: item.x, top: item.y }]}>
+                {imagePositions.map((item) => (
+                    <View
+                        key={item.number}
+                        style={[
+                            styles.imageContainer,
+                            { left: item.x, top: item.y },
+                        ]}
+                    >
                         <Image source={item.source} style={styles.image} />
                         <TouchableOpacity
                             disabled={item.number !== currentSpaceshipPosition} // 🔒 lock everything except current planet
                             style={[
                                 styles.numberLabel,
-                                item.number < currentSpaceshipPosition && styles.completedLabel,
-                                item.number !== currentSpaceshipPosition && styles.lockedLabel, // lock all except current
+                                item.number < currentSpaceshipPosition &&
+                                    styles.completedLabel,
+                                item.number !== currentSpaceshipPosition &&
+                                    styles.lockedLabel, // lock all except current
                             ]}
                             onPress={() => {
                                 if (item.number === currentSpaceshipPosition) {
-                                    navigation.navigate('Game', { planetNumber: item.number });
+                                    navigation.navigate("Game", {
+                                        planetNumber: item.number,
+                                    });
                                 }
                             }}
                         >
-
                             <Text
                                 style={[
                                     styles.numberText,
-                                    item.number < currentSpaceshipPosition && styles.completedText,
-                                    item.number !== currentSpaceshipPosition && styles.lockedText,
+                                    item.number < currentSpaceshipPosition &&
+                                        styles.completedText,
+                                    item.number !== currentSpaceshipPosition &&
+                                        styles.lockedText,
                                 ]}
                             >
                                 {item.number < currentSpaceshipPosition
-                                    ? '✓'
+                                    ? "✓"
                                     : item.number !== currentSpaceshipPosition
-                                        ? '🔒'
-                                        : item.number}
+                                    ? "🔒"
+                                    : item.number}
                             </Text>
-
-
                         </TouchableOpacity>
 
-                        {item.number === currentSpaceshipPosition && !isSpaceshipTravelling && (
-                            <View style={[styles.spaceshipContainer, { top: -30, left: 45 }]}>
-                                <Image
-                                    source={require('../../assets/spaceship.png')}
-                                    style={styles.spaceship}
-                                />
-                            </View>
-                        )}
+                        {item.number === currentSpaceshipPosition &&
+                            !isSpaceshipTravelling && (
+                                <View
+                                    style={[
+                                        styles.spaceshipContainer,
+                                        { top: -30, left: 45 },
+                                    ]}
+                                >
+                                    <Image
+                                        source={require("../../assets/spaceship.png")}
+                                        style={styles.spaceship}
+                                    />
+                                </View>
+                            )}
                     </View>
                 ))}
 
@@ -308,7 +386,7 @@ export default function HomePage({ route, navigation }: any) {
                         ]}
                     >
                         <Image
-                            source={require('../../assets/travellingSpaceship.png')}
+                            source={require("../../assets/travellingSpaceship.png")}
                             style={styles.spaceship}
                         />
                     </Animated.View>
@@ -319,7 +397,6 @@ export default function HomePage({ route, navigation }: any) {
             <View style={styles.pointsCircle}>
                 <Text style={styles.pointsText}>{totalPoints}</Text>
             </View>
-
         </View>
     );
 }
@@ -328,65 +405,75 @@ export default function HomePage({ route, navigation }: any) {
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#000' },
+    container: { flex: 1, backgroundColor: "#000" },
     scrollView: { flex: 1 },
     scrollContent: {
         height: 1200,
-        width: '100%',
-        position: 'relative',
-        alignItems: 'flex-start',
+        width: "100%",
+        position: "relative",
+        alignItems: "flex-start",
         paddingLeft: 20,
     },
     svgOverlay: {
-        position: 'absolute',
+        position: "absolute",
         top: 0,
         left: 0,
-        width: '100%',
+        width: "100%",
         height: 1200,
         zIndex: 1,
     },
-    imageContainer: { position: 'absolute', zIndex: 2 },
-    image: { width: 150, height: 150, resizeMode: 'contain' },
-    spaceshipContainer: { position: 'absolute', zIndex: 3 },
-    travellingSpaceshipContainer: { position: 'absolute', left: 0, top: 0, zIndex: 4 },
-    spaceship: { width: 60, height: 60, resizeMode: 'contain' },
+    imageContainer: { position: "absolute", zIndex: 2 },
+    image: { width: 150, height: 150, resizeMode: "contain" },
+    spaceshipContainer: { position: "absolute", zIndex: 3 },
+    travellingSpaceshipContainer: {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        zIndex: 4,
+    },
+    spaceship: { width: 60, height: 60, resizeMode: "contain" },
     numberLabel: {
-        position: 'absolute',
+        position: "absolute",
         top: 60,
         left: 60,
-        backgroundColor: 'rgba(255,255,255,0.9)',
+        backgroundColor: "rgba(255,255,255,0.9)",
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 15,
         minWidth: 30,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.5,
         shadowRadius: 3.84,
         elevation: 5,
     },
-    numberText: { color: '#000', fontSize: 20, fontWeight: 'bold', textAlign: 'center' },
-    completedLabel: { backgroundColor: '#28a745' },
-    completedText: { color: '#fff', fontSize: 24 },
+    numberText: {
+        color: "#000",
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    completedLabel: { backgroundColor: "#28a745" },
+    completedText: { color: "#fff", fontSize: 24 },
     lockedLabel: {
-        backgroundColor: 'rgba(100, 100, 100, 0.6)',
+        backgroundColor: "rgba(100, 100, 100, 0.6)",
     },
 
     lockedText: {
-        color: '#aaa',
+        color: "#aaa",
         fontSize: 20,
     },
     pointsCircle: {
-        position: 'absolute',
+        position: "absolute",
         bottom: 100, // Above the tab bar
         right: 20,
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#8B5FBF',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#8B5FBF',
+        backgroundColor: "#8B5FBF",
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#8B5FBF",
         shadowOffset: {
             width: 0,
             height: 4,
@@ -397,9 +484,8 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     pointsText: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
-
 });

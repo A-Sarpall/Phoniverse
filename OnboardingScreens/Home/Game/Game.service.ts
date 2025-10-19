@@ -183,89 +183,22 @@ export const analyzeRecordingWithSSound = async (recordedUri: string) => {
 
         console.log("=== FILE SAVED ===");
 
-        // Get file info for both files
-        // const truthInfo = await FileSystem.getInfoAsync(truthLocalUri);
-        // const recordedInfo = await FileSystem.getInfoAsync(recordedUri);
+        // HARDCODED: Return mock analysis result immediately
+        console.log("=== RETURNING HARDCODED ANALYSIS RESULT ===");
 
-        // console.log("=== FILE INFO CHECK ===");
-        // console.log("Truth file exists:", truthInfo.exists);
-        // console.log("Truth file size:", truthInfo.size, "bytes");
-        // console.log("Truth file URI:", truthLocalUri);
-        // console.log("Recorded file exists:", recordedInfo.exists);
-        // console.log("Recorded file size:", recordedInfo.size, "bytes");
-        // console.log("Recorded file URI:", recordedUri);
+        // Clean up temporary file
+        await FileSystem.deleteAsync(truthLocalUri, { idempotent: true });
+        console.log("Cleaned up temporary ground truth file");
 
-        // if (!truthInfo.exists || truthInfo.size === 0) {
-        //     throw new Error(
-        //         `Ground truth file is empty or doesn't exist! exists=${truthInfo.exists}, size=${truthInfo.size}`
-        //     );
-        // }
-
-        // if (!recordedInfo.exists || recordedInfo.size === 0) {
-        //     throw new Error(
-        //         `Recorded file is empty or doesn't exist! exists=${recordedInfo.exists}, size=${recordedInfo.size}`
-        //     );
-        // }
-
-        // // Create FormData for analysis
-        // const analysisFormData = new FormData();
-
-        // console.log("=== READING FILES AS BASE64 FOR UPLOAD ===");
-
-        // // Read truth audio as base64 (we already have it from earlier)
-        // console.log(
-        //     "Truth audio already in base64, length:",
-        //     base64Audio.length
-        // );
-
-        // // Read recorded audio as base64
-        // console.log("Reading recorded audio as base64...");
-        // const recordedBase64 = await FileSystem.readAsStringAsync(recordedUri, {
-        //     encoding: FileSystem.EncodingType.Base64,
-        // });
-        // console.log("Recorded audio base64 length:", recordedBase64.length);
-
-        // console.log("=== FORMDATA PREPARATION ===");
-
-        // // Send base64 strings directly - server will decode them
-        // analysisFormData.append("truth_audio_base64", base64Audio);
-        // analysisFormData.append("truth_audio_filename", "truth_audio.mp3");
-        // console.log("✓ Added truth_audio base64 to FormData");
-
-        // analysisFormData.append("recorded_audio_base64", recordedBase64);
-        // analysisFormData.append(
-        //     "recorded_audio_filename",
-        //     "recorded_audio.m4a"
-        // );
-        // console.log("✓ Added recorded_audio base64 to FormData");
-
-        // console.log("=== SENDING REQUEST TO SERVER ===");
-
-        // // Call the analyze endpoint
-        // const analyzeResponse = await fetch(`${SERVER_URL}/analyze`, {
-        //     method: "POST",
-        //     body: analysisFormData,
-        // });
-
-        // console.log("Analysis response status:", analyzeResponse.status);
-
-        // if (!analyzeResponse.ok) {
-        //     const errorText = await analyzeResponse.text();
-        //     console.error("=== ANALYSIS FAILED ===");
-        //     console.error("Status:", analyzeResponse.status);
-        //     console.error("Error response:", errorText);
-        //     throw new Error(`Analysis failed: ${errorText}`);
-        // }
-
-        // const result = await analyzeResponse.json();
-        // console.log("=== ANALYSIS SUCCESS ===");
-        // console.log("Analysis result:", JSON.stringify(result, null, 2));
-
-        // // Clean up temporary files
-        // await FileSystem.deleteAsync(truthLocalUri, { idempotent: true });
-        // console.log("Cleaned up temporary ground truth file");
-
-        return "You did it!";
+        return {
+            truth_transcription: "Sally sells sea shells by the sea shore",
+            recorded_transcription: "Sally sells sea shells by the sea shore",
+            lisp_analysis: {
+                has_lisp: false,
+                confidence: 0.95,
+                details: "Great pronunciation! 🎉",
+            },
+        };
     } catch (error) {
         console.error("=== ANALYSIS ERROR ===");
         console.error("Failed to analyze recording:", error);

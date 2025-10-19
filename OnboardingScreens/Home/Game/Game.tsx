@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useState } from "react";
+import React, { useContext, useLayoutEffect, useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -8,7 +8,7 @@ import {
     Modal,
     ActivityIndicator,
 } from "react-native";
-import {useFocusEffect, useRoute} from "@react-navigation/native";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio } from "expo-av";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -27,6 +27,7 @@ const Game = ({ navigation }: any) => {
     const [score, setScore] = useState<number | null>(null);
     const [missionStarted, setMissionStarted] = useState(false);
     const [missionCompleted, setMissionCompleted] = useState(false);
+    const [allowNavigation, setAllowNavigation] = useState(false); // Flag to control beforeRemove
     const theme = useContext(ThemeContext);
 
     const {
@@ -45,6 +46,38 @@ const Game = ({ navigation }: any) => {
     useLayoutEffect(() => {
         navigation.setOptions({ title: `Planet ${planetNumber}` });
     }, [navigation, planetNumber]);
+
+    // Intercept ALL back navigation (hardware back, header back, etc.)
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
+            // Allow programmatic navigation (when handleGoHome is called)
+            if (allowNavigation) {
+                console.log(
+                    `✅ Allowing programmatic navigation from Planet ${planetNumber}`
+                );
+                return; // Don't prevent navigation
+            }
+
+            // Prevent default user-initiated back navigation
+            e.preventDefault();
+
+            console.log(
+                `🔙 Intercepting user back navigation from Planet ${planetNumber}`
+            );
+
+            // Navigate back to home with completedPlanet param
+            setAllowNavigation(true); // Allow this navigation
+            navigation.navigate("MainTabs", {
+                screen: "Home",
+                params: {
+                    completedPlanet: planetNumber,
+                    timestamp: Date.now(),
+                },
+            });
+        });
+
+        return unsubscribe;
+    }, [navigation, planetNumber, allowNavigation]);
 
     const handleStartMission = async () => {
         try {
@@ -120,9 +153,6 @@ const Game = ({ navigation }: any) => {
                 const result = await analyzeRecordingWithSSound(uri);
                 setAnalysisResult(result);
                 setMissionCompleted(true);
-                navigation.navigate("MainTabs", {
-                    completedPlanet: planetNumber,
-                });
 
                 console.log("Analysis complete:", result);
             } catch (err) {
@@ -138,10 +168,19 @@ const Game = ({ navigation }: any) => {
     };
 
     const handleGoHome = () => {
+        console.log(`🏠 Navigating home with completedPlanet: ${planetNumber}`);
         setModalVisible(false);
-        navigation.replace("MainTabs", {
+
+        // Set flag to allow navigation
+        setAllowNavigation(true);
+
+        // Navigate to MainTabs and ensure Home screen gets the params
+        navigation.navigate("MainTabs", {
             screen: "Home",
-            params: { completedPlanet: planetNumber },
+            params: {
+                completedPlanet: planetNumber,
+                timestamp: Date.now(), // Force params update
+            },
         });
     };
 
@@ -269,10 +308,10 @@ const Game = ({ navigation }: any) => {
                                     style={styles.finishButton}
                                     onPress={() => {
                                         console.log(
-                                            `Mission completed for Planet ${planetNumber}`
+                                            `✅ Mission completed for Planet ${planetNumber}, navigating home`
                                         );
                                         setMissionCompleted(true);
-                                        handleGoHome()
+                                        handleGoHome();
                                     }}
                                 >
                                     <Text style={styles.finishButtonText}>
