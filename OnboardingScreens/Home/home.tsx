@@ -1,14 +1,47 @@
 import React from 'react';
-import { View, ScrollView, Image, Text, StyleSheet } from 'react-native';
+import { View, ScrollView, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import Svg, { Line, Circle } from 'react-native-svg';
 
 export default function HomePage() {
   const images = [
-    { source: require('../../assets/planet1.png'), number: 5 },
-    { source: require('../../assets/asteroid1.png'), number: 4 },
+    { source: require('../../assets/planet1.png'), number: 1 },
+    { source: require('../../assets/asteroid1.png'), number: 2 },
     { source: require('../../assets/planet2.png'), number: 3 },
-    { source: require('../../assets/asteroid2.png'), number: 2 },
-    { source: require('../../assets/planet3.png'), number: 1 },
+    { source: require('../../assets/asteroid2.png'), number: 4 },
+    { source: require('../../assets/planet3.png'), number: 5 },
   ];
+
+  // Generate random star positions for the starfield background
+  const generateStars = () => {
+    const stars = [];
+    const starCount = 80; // Number of stars
+    const containerWidth = 400;
+    const containerHeight = 1200;
+    
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
+        id: i,
+        x: Math.random() * containerWidth,
+        y: Math.random() * containerHeight,
+        size: Math.random() * 2 + 0.5, // Random size between 0.5 and 2.5
+        opacity: Math.random() * 0.8 + 0.2, // Random opacity between 0.2 and 1
+      });
+    }
+    return stars;
+  };
+
+  const stars = generateStars();
+
+  // Calculate positions for zigzag layout (reversed - start from bottom)
+  const imagePositions = images.map((item, index) => {
+    const screenWidth = 300; // Approximate screen width
+    const imageSize = 150; // Increased image size
+    const offset = 50; // Shift the entire diagram to the right
+    const x = index % 2 === 0 ? 20 + offset : screenWidth - imageSize - 20 + offset; // Alternate left and right with margins + offset
+    // Reverse the y positions so higher numbers are at the bottom
+    const y = (images.length - 1 - index) * 200 + 50; // Start from bottom, go up
+    return { ...item, x, y, index };
+  });
 
   return (
     <View style={styles.container}>
@@ -16,14 +49,85 @@ export default function HomePage() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
+        ref={(ref) => {
+          if (ref) {
+            // Scroll to bottom on mount to start from image 5
+            setTimeout(() => {
+              ref.scrollToEnd({ animated: false });
+            }, 100);
+          }
+        }}
       >
-        {images.map((item, index) => (
-          <View key={index} style={styles.imageContainer}>
+        <Svg style={styles.svgOverlay}>
+          {/* Starfield background */}
+          {stars.map((star) => (
+            <Circle
+              key={`star-${star.id}`}
+              cx={star.x}
+              cy={star.y}
+              r={star.size}
+              fill="white"
+              opacity={star.opacity}
+            />
+          ))}
+          
+          {/* Connecting lines between images */}
+          {imagePositions.map((item, index) => {
+            if (index < imagePositions.length - 1) {
+              const current = imagePositions[index];
+              const next = imagePositions[index + 1];
+              return (
+                <Line
+                  key={`line-${index}`}
+                  x1={current.x + 75} // Center of current image (150px image / 2)
+                  y1={current.y + 75} // Center of current image
+                  x2={next.x + 75} // Center of next image
+                  y2={next.y + 75} // Center of next image
+                  stroke="#60359c"
+                  strokeWidth="3"
+                  strokeDasharray="5,5"
+                />
+              );
+            }
+            return null;
+          })}
+        </Svg>
+        
+        {imagePositions.map((item, index) => (
+          <View 
+            key={index} 
+            style={[
+              styles.imageContainer,
+              {
+                position: 'absolute',
+                left: item.x,
+                top: item.y,
+              }
+            ]}
+          >
             <Image source={item.source} style={styles.image} />
             <Text style={styles.numberLabel}>{item.number}</Text>
           </View>
         ))}
       </ScrollView>
+      
+      {/* Bottom Navigation Bar */}
+      <View style={styles.navbar}>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🎮</Text>
+          <Text style={styles.navLabel}>Minigames</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>👤</Text>
+          <Text style={styles.navLabel}>Avatar</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navLabel}>Shop</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -35,33 +139,45 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    marginBottom: 80, // Add margin to account for navbar height
   },
   scrollContent: {
-    alignItems: 'center',
-    paddingVertical: 20,
+    height: 1200, // Increased height to accommodate larger images and spacing
+    width: '100%',
+    position: 'relative',
+    alignItems: 'flex-start',
+    paddingLeft: 20, // Add left padding to accommodate the right shift
+  },
+  svgOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: 1200,
+    zIndex: 1,
   },
   imageContainer: {
     position: 'relative',
-    marginVertical: 20,
+    zIndex: 2,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 150,
+    height: 150,
     resizeMode: 'contain',
   },
   numberLabel: {
     position: 'absolute',
-    top: 88,
-    left: 88,
+    top: 60,
+    left: 60,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     color: '#000',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 15,
     textAlign: 'center',
-    minWidth: 40,
+    minWidth: 30,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -70,5 +186,42 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  navbar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    backgroundColor: 'rgba(22, 11, 32, 0.95)', // Semi-transparent dark background
+    borderTopWidth: 1,
+    borderTopColor: '#60359c',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingBottom: 20, // Account for safe area
+    paddingTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
+  },
+  navItem: {
+    alignItems: 'center',
+    flex: 1,
+    paddingVertical: 5,
+  },
+  navIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  navLabel: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });
