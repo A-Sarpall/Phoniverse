@@ -6,51 +6,53 @@ import { ThemeContext } from "../../App";
 import { stringsToPronounce } from "../../sentences/onboardingSentences";
 import { styles } from "./InitialAssessment.style";
 import useInitialAssessment from "./useInitialAssessment";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { analyzeRecording, createVoiceClone } from "./InitialAssessment.service";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const InitialAssessment = ({navigation}: any) => {
+const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
 
     const {
-        currentIndex,
         isRecording,
         isDoneRecording,
         record,
         stopRecording,
-        audioRecorder,
-        setIsRecording,
-        setIsDoneRecording,
         resetRecording,
-    } = useInitialAssessment(stringsToPronounce.length);
+    } = useInitialAssessment();
 
     const circleColor = "#2c1743";
 
-    const handleBottomButtonPress = () => {
+    const handleBottomButtonPress = async () => {
         if (isRecording) {
-            void stopRecording().then(() => {
-                console.log(audioRecorder.uri);
-            });
+            const uri = await stopRecording();
+            console.log("Recorded audio URI:", uri);
+
+            try {
+                const cloneResult = await createVoiceClone(uri!, "userClone", "User's custom voice clone");
+                console.log("Voice ID:", cloneResult.voice_id);
+            } catch (err) {
+                console.error(err);
+            }
+
         } else if (isDoneRecording) {
             navigation.replace("DoneRecording");
         } else {
-            void record();
+            await record();
         }
     };
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <View style={styles.topContainer}>
-                <Text style={styles.instructionText}>Can you pronounce</Text>
-                <Text style={styles.sentenceText}>
-                    "{stringsToPronounce[currentIndex]}"
-                </Text>
+                <Text style={styles.instructionText}>Repeat this phrase loud and clear!: </Text>
+                <Text style={styles.sentenceText}>"{stringsToPronounce[0]}"</Text>
             </View>
 
             <View style={styles.middleContainer}>
                 <TouchableOpacity
                     style={[styles.micButton, { backgroundColor: circleColor }]}
                     activeOpacity={0.8}
-                    onPress={() => {navigation.replace("MainTabs")}}
+                    onPress={() => navigation.replace("MainTabs")}
                 >
                     <FontAwesomeIcon icon={faMicrophone} size={80} color="white" />
                 </TouchableOpacity>
@@ -71,8 +73,6 @@ const InitialAssessment = ({navigation}: any) => {
                         style={[styles.button, { backgroundColor: "none", marginTop: 12 }]}
                         onPress={() => {
                             resetRecording();
-                            setIsRecording(true);
-                            setIsDoneRecording(false);
                             void record();
                         }}
                     >

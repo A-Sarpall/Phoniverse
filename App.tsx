@@ -58,12 +58,6 @@ export default function App() {
                         options={{ headerShown: false }}
                     />
 
-                    {/* 🚀 Full-screen Game screen (no tab bar) */}
-                    <Stack.Screen
-                        name="Game"
-                        component={Game}
-                        options={{ headerShown: false, gestureEnabled: false }}
-                    />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeContext.Provider>

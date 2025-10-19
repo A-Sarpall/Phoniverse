@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     topContainer: {
         width: "100%",
         alignItems: "center",
+        paddingHorizontal: 20,
     },
     instructionText: {
         color: "white",

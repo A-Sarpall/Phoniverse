@@ -1,22 +1,30 @@
-import {useState, useRef, useEffect} from "react";
+import { useState, useRef, useEffect } from "react";
 import { Audio } from "expo-av";
-import {AudioModule, RecordingPresets, setAudioModeAsync, useAudioRecorder, useAudioRecorderState} from "expo-audio";
-import {Alert} from "react-native";
+import { Alert } from "react-native";
+import {
+    AudioModule,
+    RecordingPresets,
+    setAudioModeAsync,
+    useAudioRecorder,
+    useAudioRecorderState,
+} from "expo-audio";
 
-const useInitialAssessment = (totalSentences: number) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
+const MAX_RECORDING_DURATION = 15000; // 15 seconds
+
+const useInitialAssessment = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [isDoneRecording, setIsDoneRecording] = useState(false);
-    const [recordings, setRecordings] = useState<string[]>([]);
-    const recordingRef = useRef<Audio.Recording | null>(null);
+    const [recordingUri, setRecordingUri] = useState<string | null>(null);
+
     const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
     const recorderState = useAudioRecorderState(audioRecorder);
+    const stopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         (async () => {
             const status = await AudioModule.requestRecordingPermissionsAsync();
             if (!status.granted) {
-                Alert.alert('Permission to access microphone was denied');
+                Alert.alert("Permission to access microphone was denied");
             }
 
             await setAudioModeAsync({
@@ -30,44 +38,44 @@ const useInitialAssessment = (totalSentences: number) => {
         await audioRecorder.prepareToRecordAsync();
         audioRecorder.record();
         setIsRecording(true);
+
+        stopTimeoutRef.current = setTimeout(() => {
+            void stopRecording();
+        }, MAX_RECORDING_DURATION);
     };
 
     const stopRecording = async () => {
-        await audioRecorder.stop();
-        setIsDoneRecording(true);
-        setIsRecording(false);
-    };
-
-    const nextSentence = () => {
-        if (currentIndex < totalSentences - 1) {
-            setCurrentIndex(prev => prev + 1);
-            setIsDoneRecording(false);
-            recordingRef.current = null;
-        } else {
-            console.log("All recordings:", recordings);
-            alert("All sentences recorded!");
+        if (stopTimeoutRef.current) {
+            clearTimeout(stopTimeoutRef.current);
+            stopTimeoutRef.current = null;
         }
+
+        await audioRecorder.stop();
+        setIsRecording(false);
+        setIsDoneRecording(true);
+
+        const uri = audioRecorder.uri;
+        setRecordingUri(uri ?? null);
+        return uri;
     };
 
     const resetRecording = () => {
-        recordingRef.current = null;
+        if (stopTimeoutRef.current) clearTimeout(stopTimeoutRef.current);
         setIsRecording(false);
         setIsDoneRecording(false);
+        setRecordingUri(null);
     };
 
     return {
-        currentIndex,
         isRecording,
         isDoneRecording,
-        recordings,
         record,
-        recorderState,
         stopRecording,
-        audioRecorder,
-        nextSentence,
         resetRecording,
         setIsRecording,
         setIsDoneRecording,
+        recordingUri,
+        recorderState,
     };
 };
 

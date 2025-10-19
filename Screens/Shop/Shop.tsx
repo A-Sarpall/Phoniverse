@@ -1,43 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 
 export default function Shop() {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>🛒 Shop</Text>
-            <Text style={styles.subtitle}>Upgrade your space gear!</Text>
-
-            <View style={styles.currencyContainer}>
-                <Text style={styles.currency}>💰 1,250 Space Coins</Text>
-            </View>
-
-            <View style={styles.shopContainer}>
-                <TouchableOpacity style={styles.shopItem}>
-                    <Text style={styles.itemIcon}>🚀</Text>
-                    <Text style={styles.itemName}>Rocket Booster</Text>
-                    <Text style={styles.itemPrice}>500 coins</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.shopItem}>
-                    <Text style={styles.itemIcon}>🛡️</Text>
-                    <Text style={styles.itemName}>Shield Generator</Text>
-                    <Text style={styles.itemPrice}>750 coins</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.shopItem}>
-                    <Text style={styles.itemIcon}>⚡</Text>
-                    <Text style={styles.itemName}>Energy Core</Text>
-                    <Text style={styles.itemPrice}>300 coins</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.shopItem}>
-                    <Text style={styles.itemIcon}>🎨</Text>
-                    <Text style={styles.itemName}>Paint Job</Text>
-                    <Text style={styles.itemPrice}>200 coins</Text>
-                </TouchableOpacity>
-            </View>
-
         </View>
     );
 }
