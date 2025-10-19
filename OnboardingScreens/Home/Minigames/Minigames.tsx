@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Minigames() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🎮 Minigames</Text>
@@ -32,11 +32,11 @@ export default function Minigames() {
       {/* Bottom Navigation Bar */}
       <View style={styles.navbar}>
         <TouchableOpacity 
-          style={[styles.navItem, styles.activeNavItem]}
-          onPress={() => navigation.navigate('Minigames')}
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Home')}
         >
-          <Text style={styles.navIcon}>🎮</Text>
-          <Text style={styles.navLabel}>Minigames</Text>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={styles.navLabel}>Home</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
