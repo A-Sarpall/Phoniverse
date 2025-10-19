@@ -1,96 +1,105 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { AvatarContext, PointsContext } from '../../../App';
+import React, { useContext } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    Image,
+    ScrollView,
+    TouchableOpacity,
+    Dimensions,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { AvatarContext, PointsContext } from "../../../App";
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 // All available cosmetic items (same as shop)
 const cosmeticItems = [
     {
-        id: '1',
-        name: 'Beanie',
-        image: require('../../../assets/HackTX Drawings/Beanie.png'),
+        id: "1",
+        name: "Beanie",
+        image: require("../../../assets/HackTX Alien/Beanie.png"),
         price: 50,
-        category: 'head' as const,
-        position: { x: 50, y: 10, width: 100, height: 80 }
+        category: "head" as const,
+        position: { x: 50, y: 10, width: 100, height: 80 },
     },
     {
-        id: '2',
-        name: 'Chain',
-        image: require('../../../assets/HackTX Drawings/goldchain.png'),
+        id: "2",
+        name: "Chain",
+        image: require("../../../assets/HackTX Alien/goldchain.png"),
         price: 75,
-        category: 'neck' as const,
-        position: { x: 60, y: 80, width: 80, height: 40 }
+        category: "neck" as const,
+        position: { x: 60, y: 80, width: 80, height: 40 },
     },
     {
-        id: '3',
-        name: 'Cowboy Hat',
-        image: require('../../../assets/HackTX Drawings/cowboyhat.png'),
+        id: "3",
+        name: "Cowboy Hat",
+        image: require("../../../assets/HackTX Alien/cowboyhat.png"),
         price: 100,
-        category: 'head' as const,
-        position: { x: 40, y: 5, width: 120, height: 90 }
+        category: "head" as const,
+        position: { x: 40, y: 5, width: 120, height: 90 },
     },
     {
-        id: '4',
-        name: 'Headphones',
-        image: require('../../../assets/HackTX Drawings/headphones.png'),
+        id: "4",
+        name: "Headphones",
+        image: require("../../../assets/HackTX Alien/headphones.png"),
         price: 80,
-        category: 'head' as const,
-        position: { x: 30, y: 20, width: 140, height: 70 }
+        category: "head" as const,
+        position: { x: 30, y: 20, width: 140, height: 70 },
     },
     {
-        id: '5',
-        name: 'Purse',
-        image: require('../../../assets/HackTX Drawings/Purse.png'),
+        id: "5",
+        name: "Purse",
+        image: require("../../../assets/HackTX Alien/Purse.png"),
         price: 60,
-        category: 'hands' as const,
-        position: { x: 120, y: 140, width: 60, height: 50 }
+        category: "hands" as const,
+        position: { x: 120, y: 140, width: 60, height: 50 },
     },
     {
-        id: '6',
-        name: 'Scarf',
-        image: require('../../../assets/HackTX Drawings/scarf.png'),
+        id: "6",
+        name: "Scarf",
+        image: require("../../../assets/HackTX Alien/scarf.png"),
         price: 40,
-        category: 'neck' as const,
-        position: { x: 50, y: 70, width: 100, height: 60 }
+        category: "neck" as const,
+        position: { x: 50, y: 70, width: 100, height: 60 },
     },
     {
-        id: '7',
-        name: 'Spin Hat',
-        image: require('../../../assets/HackTX Drawings/spinhat.png'),
+        id: "7",
+        name: "Spin Hat",
+        image: require("../../../assets/HackTX Alien/spinhat.png"),
         price: 90,
-        category: 'head' as const,
-        position: { x: 45, y: 8, width: 110, height: 85 }
+        category: "head" as const,
+        position: { x: 45, y: 8, width: 110, height: 85 },
     },
     {
-        id: '8',
-        name: 'Sunglasses',
-        image: require('../../../assets/HackTX Drawings/Sunglasses.png'),
+        id: "8",
+        name: "Sunglasses",
+        image: require("../../../assets/HackTX Alien/Sunglasses.png"),
         price: 70,
-        category: 'head' as const,
-        position: { x: 60, y: 50, width: 80, height: 30 }
+        category: "head" as const,
+        position: { x: 60, y: 50, width: 80, height: 30 },
     },
     {
-        id: '9',
-        name: 'Tie',
-        image: require('../../../assets/HackTX Drawings/tie.png'),
+        id: "9",
+        name: "Tie",
+        image: require("../../../assets/HackTX Alien/tie.png"),
         price: 55,
-        category: 'neck' as const,
-        position: { x: 70, y: 85, width: 60, height: 50 }
+        category: "neck" as const,
+        position: { x: 70, y: 85, width: 60, height: 50 },
     },
     {
-        id: '10',
-        name: 'Top Hat',
-        image: require('../../../assets/HackTX Drawings/tophat.png'),
+        id: "10",
+        name: "Top Hat",
+        image: require("../../../assets/HackTX Alien/tophat.png"),
         price: 120,
-        category: 'head' as const,
-        position: { x: 55, y: 0, width: 90, height: 100 }
+        category: "head" as const,
+        position: { x: 55, y: 0, width: 90, height: 100 },
     },
 ];
 
 export default function Avatar() {
-    const { purchasedItems, equippedItems, equipItem, unequipItem } = useContext(AvatarContext);
+    const { purchasedItems, equippedItems, equipItem, unequipItem } =
+        useContext(AvatarContext);
     const navigation = useNavigation<any>();
 
     const handleItemSelect = (item: any) => {
@@ -104,7 +113,7 @@ export default function Avatar() {
     };
 
     const isItemEquipped = (itemId: string) => {
-        return equippedItems.some(item => item.id === itemId);
+        return equippedItems.some((item) => item.id === itemId);
     };
 
     const renderCosmeticItem = (item: any) => (
@@ -112,15 +121,20 @@ export default function Avatar() {
             key={item.id}
             style={[
                 styles.cosmeticItem,
-                isItemEquipped(item.id) && styles.cosmeticItemEquipped
+                isItemEquipped(item.id) && styles.cosmeticItemEquipped,
             ]}
-            onPress={() => handleItemSelect(item)}
+            onPress={() => {
+                console.log(item.name);
+                handleItemSelect(item);
+            }}
         >
-            <Image source={item.image} style={styles.cosmeticImage} />
-            <Text style={[
-                styles.cosmeticName,
-                isItemEquipped(item.id) && styles.equippedText
-            ]}>
+            <Image source={item.name} style={styles.cosmeticImage} />
+            <Text
+                style={[
+                    styles.cosmeticName,
+                    isItemEquipped(item.id) && styles.equippedText,
+                ]}
+            >
                 {item.name}
             </Text>
             {isItemEquipped(item.id) && (
@@ -149,7 +163,7 @@ export default function Avatar() {
                         ) : (
                             // Show trainer as default
                             <Image
-                                source={require('../../../assets/trainer.png')}
+                                source={require("../../../assets/trainer.png")}
                                 style={styles.baseAvatar}
                             />
                         )}
@@ -168,7 +182,9 @@ export default function Avatar() {
                 {/* Horizontal scroll view for cosmetics - moved lower */}
                 {purchasedItems.length > 0 && (
                     <View style={styles.cosmeticsContainer}>
-                        <Text style={styles.cosmeticsTitle}>🎨 Your Cosmetic Items</Text>
+                        <Text style={styles.cosmeticsTitle}>
+                            🎨 Your Cosmetic Items
+                        </Text>
                         <ScrollView
                             horizontal
                             showsHorizontalScrollIndicator={false}
@@ -181,10 +197,10 @@ export default function Avatar() {
             </View>
 
             {/* Bottom Navigation Bar */}
-            <View style={styles.navbar}>
+            {/* <View style={styles.navbar}>
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => navigation.navigate('Home')}
+                    onPress={() => navigation.navigate("Home")}
                 >
                     <Text style={styles.navIcon}>🏠</Text>
                     <Text style={styles.navLabel}>Home</Text>
@@ -192,7 +208,7 @@ export default function Avatar() {
 
                 <TouchableOpacity
                     style={[styles.navItem, styles.activeNavItem]}
-                    onPress={() => navigation.navigate('Avatar')}
+                    onPress={() => navigation.navigate("Avatar")}
                 >
                     <Text style={styles.navIcon}>👤</Text>
                     <Text style={styles.navLabel}>Avatar</Text>
@@ -200,12 +216,12 @@ export default function Avatar() {
 
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => navigation.navigate('Shop')}
+                    onPress={() => navigation.navigate("Shop")}
                 >
                     <Text style={styles.navIcon}>🛒</Text>
                     <Text style={styles.navLabel}>Shop</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
         </View>
     );
 }
@@ -213,36 +229,36 @@ export default function Avatar() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
+        backgroundColor: "#000",
         padding: 20,
         paddingTop: 60,
     },
     title: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#fff',
-        textAlign: 'center',
+        fontWeight: "bold",
+        color: "#fff",
+        textAlign: "center",
         marginBottom: 10,
     },
     subtitle: {
         fontSize: 16,
-        color: '#60359c',
-        textAlign: 'center',
+        color: "#60359c",
+        textAlign: "center",
         marginBottom: 30,
     },
     avatarContainer: {
         flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
+        justifyContent: "flex-start",
+        alignItems: "center",
         paddingTop: 20,
     },
     avatarDisplay: {
-        alignItems: 'center',
+        alignItems: "center",
         marginBottom: 20,
         marginTop: 20,
     },
     avatarBase: {
-        position: 'relative',
+        position: "relative",
         width: 200,
         height: 200,
         marginBottom: 20,
@@ -250,59 +266,59 @@ const styles = StyleSheet.create({
     baseAvatar: {
         width: 200,
         height: 200,
-        resizeMode: 'contain',
+        resizeMode: "contain",
     },
     itemLayer: {
-        position: 'absolute',
-        resizeMode: 'contain',
+        position: "absolute",
+        resizeMode: "contain",
     },
     avatarName: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#fff',
+        fontWeight: "bold",
+        color: "#fff",
         marginBottom: 10,
     },
     equippedItemText: {
         fontSize: 14,
-        color: '#60359c',
-        textAlign: 'center',
+        color: "#60359c",
+        textAlign: "center",
         marginBottom: 20,
-        fontStyle: 'italic',
+        fontStyle: "italic",
     },
     equippedItems: {
-        backgroundColor: 'rgba(96, 53, 156, 0.2)',
+        backgroundColor: "rgba(96, 53, 156, 0.2)",
         borderRadius: 15,
         padding: 15,
         borderWidth: 1,
-        borderColor: '#60359c',
+        borderColor: "#60359c",
         minWidth: 200,
     },
     equippedTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#60359c',
+        fontWeight: "bold",
+        color: "#60359c",
         marginBottom: 10,
-        textAlign: 'center',
+        textAlign: "center",
     },
     equippedItem: {
         fontSize: 14,
-        color: '#fff',
+        color: "#fff",
         marginBottom: 5,
     },
     cosmeticsContainer: {
         marginTop: 30,
         marginBottom: 30,
-        position: 'absolute',
+        position: "absolute",
         bottom: 50,
         left: 0,
         right: 0,
-        alignItems: 'center',
+        alignItems: "center",
     },
     cosmeticsTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
-        color: '#60359c',
-        textAlign: 'center',
+        fontWeight: "bold",
+        color: "#60359c",
+        textAlign: "center",
         marginBottom: 15,
     },
     cosmeticsScroll: {
@@ -311,66 +327,66 @@ const styles = StyleSheet.create({
     cosmeticItem: {
         width: 80,
         height: 100,
-        backgroundColor: 'rgba(96, 53, 156, 0.2)',
+        backgroundColor: "rgba(96, 53, 156, 0.2)",
         borderRadius: 15,
         padding: 8,
-        alignItems: 'center',
+        alignItems: "center",
         marginRight: 10,
         borderWidth: 2,
-        borderColor: 'transparent',
-        position: 'relative',
+        borderColor: "transparent",
+        position: "relative",
     },
     cosmeticImage: {
         width: 60,
         height: 60,
-        resizeMode: 'contain',
+        resizeMode: "contain",
         marginBottom: 5,
     },
     cosmeticName: {
         fontSize: 10,
-        color: '#fff',
-        textAlign: 'center',
-        fontWeight: '500',
+        color: "#fff",
+        textAlign: "center",
+        fontWeight: "500",
     },
     cosmeticItemEquipped: {
-        borderColor: '#60359c',
-        backgroundColor: 'rgba(96, 53, 156, 0.4)',
+        borderColor: "#60359c",
+        backgroundColor: "rgba(96, 53, 156, 0.4)",
     },
     equippedText: {
-        color: '#60359c',
-        fontWeight: 'bold',
+        color: "#60359c",
+        fontWeight: "bold",
     },
     equippedBadge: {
-        position: 'absolute',
+        position: "absolute",
         top: 5,
         right: 5,
-        backgroundColor: '#60359c',
+        backgroundColor: "#60359c",
         borderRadius: 10,
         width: 20,
         height: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
     },
     equippedBadgeText: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 12,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
     navbar: {
-        position: 'absolute',
+        position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
         height: 80,
-        backgroundColor: 'rgba(22, 11, 32, 0.95)',
+        backgroundColor: "rgba(22, 11, 32, 0.95)",
         borderTopWidth: 1,
-        borderTopColor: '#60359c',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
+        borderTopColor: "#60359c",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
         paddingBottom: 20,
         paddingTop: 10,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: {
             width: 0,
             height: -2,
@@ -381,12 +397,12 @@ const styles = StyleSheet.create({
         zIndex: 10,
     },
     navItem: {
-        alignItems: 'center',
+        alignItems: "center",
         flex: 1,
         paddingVertical: 5,
     },
     activeNavItem: {
-        backgroundColor: 'rgba(96, 53, 156, 0.3)',
+        backgroundColor: "rgba(96, 53, 156, 0.3)",
         borderRadius: 10,
     },
     navIcon: {
@@ -394,8 +410,8 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     navLabel: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: "500",
     },
 });

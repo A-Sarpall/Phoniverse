@@ -17,8 +17,7 @@ import { ThemeContext } from "../../../App";
 import { levelSentences } from "../../../sentences/levelSentences";
 import useGame from "./useGame";
 import { stitchMissionAudio, analyzeRecordingWithSSound } from "./Game.service";
-
-const SERVER_URL = "https://134260ef2747.ngrok-free.app";
+import { SERVER_URL } from "../../../config";
 
 const Game = ({ navigation }: any) => {
     const route = useRoute();

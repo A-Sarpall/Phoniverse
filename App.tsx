@@ -53,24 +53,24 @@ export const AvatarContext = createContext<AvatarContextType>({
 });
 
 export default function App() {
-    const [totalPoints, setTotalPoints] = useState(0); // Start with 0 points
+    const [totalPoints, setTotalPoints] = useState(100); // Start with 0 points
     const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
     const [equippedItems, setEquippedItems] = useState<any[]>([]);
 
     const addPoints = useCallback((points: number) => {
-        setTotalPoints(prev => prev + points);
+        setTotalPoints((prev) => prev + points);
     }, []);
 
     const spendPoints = useCallback((points: number) => {
-        setTotalPoints(prev => Math.max(0, prev - points));
+        setTotalPoints((prev) => Math.max(0, prev - points));
     }, []);
 
     const addPurchasedItem = useCallback((item: any) => {
-        setPurchasedItems(prev => [...prev, item]);
+        setPurchasedItems((prev) => [...prev, item]);
     }, []);
 
     const removePurchasedItem = useCallback((itemId: string) => {
-        setPurchasedItems(prev => prev.filter(item => item.id !== itemId));
+        setPurchasedItems((prev) => prev.filter((item) => item.id !== itemId));
     }, []);
 
     const equipItem = useCallback((item: any) => {
@@ -78,7 +78,7 @@ export default function App() {
     }, []);
 
     const unequipItem = useCallback((itemId: string) => {
-        setEquippedItems(prev => prev.filter(item => item.id !== itemId));
+        setEquippedItems((prev) => prev.filter((item) => item.id !== itemId));
     }, []);
 
     const theme = {
@@ -86,7 +86,9 @@ export default function App() {
         text: "#fff",
         button: "#8B5FBF",
     };
-    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
+    const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<
+        boolean | null
+    >(null);
 
     useEffect(() => {
         (async () => {
@@ -147,14 +149,13 @@ export default function App() {
                                 component={MainTabs}
                                 options={{ headerShown: false }}
                             />
-                            
+
                             {/* 🎮 Game screen (accessible from planet taps) */}
                             <Stack.Screen
                                 name="Game"
                                 component={Game}
                                 options={{ headerShown: false }}
                             />
-
                         </Stack.Navigator>
                     </NavigationContainer>
                 </AvatarContext.Provider>

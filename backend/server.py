@@ -84,9 +84,17 @@ async def serve_audio_file(filename: str):
 
 @app.post("/analyze")
 async def analyze_audio(
-    truth_audio: UploadFile = File(..., description="Ground truth audio file"),
+    truth_audio: UploadFile = File(None, description="Ground truth audio file"),
     recorded_audio: UploadFile = File(
-        ..., description="Recorded audio file to analyze"
+        None, description="Recorded audio file to analyze"
+    ),
+    truth_audio_base64: str = Form(None, description="Ground truth audio as base64"),
+    recorded_audio_base64: str = Form(None, description="Recorded audio as base64"),
+    truth_audio_filename: str = Form(
+        "truth_audio.mp3", description="Truth audio filename"
+    ),
+    recorded_audio_filename: str = Form(
+        "recorded_audio.m4a", description="Recorded audio filename"
     ),
 ):
     """
@@ -102,15 +110,33 @@ async def analyze_audio(
 
     try:
         logger.info("=== ANALYSIS REQUEST RECEIVED ===")
-        logger.info(f"Truth audio filename: {truth_audio.filename}")
-        logger.info(f"Recorded audio filename: {recorded_audio.filename}")
-        logger.info(f"Truth audio content_type: {truth_audio.content_type}")
-        logger.info(f"Recorded audio content_type: {recorded_audio.content_type}")
+
+        # Check if we received base64 data or file uploads
+        use_base64 = (
+            truth_audio_base64 is not None and recorded_audio_base64 is not None
+        )
+        logger.info(f"Using base64 input: {use_base64}")
+
+        if use_base64:
+            logger.info(f"Truth audio base64 length: {len(truth_audio_base64)}")
+            logger.info(f"Recorded audio base64 length: {len(recorded_audio_base64)}")
+            logger.info(f"Truth filename: {truth_audio_filename}")
+            logger.info(f"Recorded filename: {recorded_audio_filename}")
+        else:
+            logger.info(f"Truth audio filename: {truth_audio.filename}")
+            logger.info(f"Recorded audio filename: {recorded_audio.filename}")
+            logger.info(f"Truth audio content_type: {truth_audio.content_type}")
+            logger.info(f"Recorded audio content_type: {recorded_audio.content_type}")
 
         # Validate file types
         allowed_extensions = {".wav", ".mp3", ".m4a", ".flac", ".ogg"}
-        truth_ext = os.path.splitext(truth_audio.filename)[1].lower()
-        recorded_ext = os.path.splitext(recorded_audio.filename)[1].lower()
+
+        if use_base64:
+            truth_ext = os.path.splitext(truth_audio_filename)[1].lower()
+            recorded_ext = os.path.splitext(recorded_audio_filename)[1].lower()
+        else:
+            truth_ext = os.path.splitext(truth_audio.filename)[1].lower()
+            recorded_ext = os.path.splitext(recorded_audio.filename)[1].lower()
 
         logger.info(f"Truth file extension: {truth_ext}")
         logger.info(f"Recorded file extension: {recorded_ext}")
@@ -125,33 +151,70 @@ async def analyze_audio(
             )
 
         # Save uploaded files to temporary locations
-        logger.info("=== READING TRUTH AUDIO ===")
-        truth_bytes = await truth_audio.read()
-        logger.info(f"Truth audio bytes read: {len(truth_bytes)} bytes")
-        logger.info(f"Truth audio first 20 bytes: {truth_bytes[:20]}")
+        if use_base64:
+            # Decode base64 data
+            import base64
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=truth_ext) as truth_tmp:
-            truth_path = truth_tmp.name
-            logger.info(f"Writing {len(truth_bytes)} bytes to: {truth_path}")
-            bytes_written = truth_tmp.write(truth_bytes)
-            logger.info(f"Bytes written to truth file: {bytes_written}")
-            truth_tmp.flush()
-            logger.info(f"File flushed to disk")
+            logger.info("=== DECODING BASE64 TRUTH AUDIO ===")
+            truth_bytes = base64.b64decode(truth_audio_base64)
+            logger.info(f"Truth audio bytes decoded: {len(truth_bytes)} bytes")
+            logger.info(f"Truth audio first 20 bytes: {truth_bytes[:20]}")
 
-        logger.info("=== READING RECORDED AUDIO ===")
-        recorded_bytes = await recorded_audio.read()
-        logger.info(f"Recorded audio bytes read: {len(recorded_bytes)} bytes")
-        logger.info(f"Recorded audio first 20 bytes: {recorded_bytes[:20]}")
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=truth_ext
+            ) as truth_tmp:
+                truth_path = truth_tmp.name
+                logger.info(f"Writing {len(truth_bytes)} bytes to: {truth_path}")
+                bytes_written = truth_tmp.write(truth_bytes)
+                logger.info(f"Bytes written to truth file: {bytes_written}")
+                truth_tmp.flush()
+                logger.info(f"File flushed to disk")
 
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=recorded_ext
-        ) as recorded_tmp:
-            recorded_path = recorded_tmp.name
-            logger.info(f"Writing {len(recorded_bytes)} bytes to: {recorded_path}")
-            bytes_written = recorded_tmp.write(recorded_bytes)
-            logger.info(f"Bytes written to recorded file: {bytes_written}")
-            recorded_tmp.flush()
-            logger.info(f"File flushed to disk")
+            logger.info("=== DECODING BASE64 RECORDED AUDIO ===")
+            recorded_bytes = base64.b64decode(recorded_audio_base64)
+            logger.info(f"Recorded audio bytes decoded: {len(recorded_bytes)} bytes")
+            logger.info(f"Recorded audio first 20 bytes: {recorded_bytes[:20]}")
+
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=recorded_ext
+            ) as recorded_tmp:
+                recorded_path = recorded_tmp.name
+                logger.info(f"Writing {len(recorded_bytes)} bytes to: {recorded_path}")
+                bytes_written = recorded_tmp.write(recorded_bytes)
+                logger.info(f"Bytes written to recorded file: {bytes_written}")
+                recorded_tmp.flush()
+                logger.info(f"File flushed to disk")
+        else:
+            # Read from uploaded files
+            logger.info("=== READING TRUTH AUDIO ===")
+            truth_bytes = await truth_audio.read()
+            logger.info(f"Truth audio bytes read: {len(truth_bytes)} bytes")
+            logger.info(f"Truth audio first 20 bytes: {truth_bytes[:20]}")
+
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=truth_ext
+            ) as truth_tmp:
+                truth_path = truth_tmp.name
+                logger.info(f"Writing {len(truth_bytes)} bytes to: {truth_path}")
+                bytes_written = truth_tmp.write(truth_bytes)
+                logger.info(f"Bytes written to truth file: {bytes_written}")
+                truth_tmp.flush()
+                logger.info(f"File flushed to disk")
+
+            logger.info("=== READING RECORDED AUDIO ===")
+            recorded_bytes = await recorded_audio.read()
+            logger.info(f"Recorded audio bytes read: {len(recorded_bytes)} bytes")
+            logger.info(f"Recorded audio first 20 bytes: {recorded_bytes[:20]}")
+
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=recorded_ext
+            ) as recorded_tmp:
+                recorded_path = recorded_tmp.name
+                logger.info(f"Writing {len(recorded_bytes)} bytes to: {recorded_path}")
+                bytes_written = recorded_tmp.write(recorded_bytes)
+                logger.info(f"Bytes written to recorded file: {bytes_written}")
+                recorded_tmp.flush()
+                logger.info(f"File flushed to disk")
 
         # Verify files exist and have content
         logger.info("=== VERIFYING FILES ON DISK ===")

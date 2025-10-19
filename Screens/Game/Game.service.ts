@@ -1,7 +1,6 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const SERVER_URL = "https://134260ef2747.ngrok-free.app";
+import { SERVER_URL } from "../../config";
 
 /**
  * Generate TTS audio and store it persistently
@@ -113,10 +112,7 @@ export const analyzeRecordingWithSSound = async (recordedUri: string) => {
         // Generate the ground truth audio using TTS - much longer version
         console.log("Generating ground truth audio with TTS...");
         const formData = new FormData();
-        formData.append(
-            "text",
-            "Sally sells sea shells by the sea shore. She sells sea shells surely. The shells she sells are surely sea shells. So if she sells shells on the seashore, I'm sure she sells seashore shells."
-        );
+        formData.append("text", "Sally sells sea shells by the sea shore.");
 
         const ttsResponse = await fetch(`${SERVER_URL}/tts/generate`, {
             method: "POST",
@@ -206,35 +202,35 @@ export const analyzeRecordingWithSSound = async (recordedUri: string) => {
         // Create FormData for analysis
         const analysisFormData = new FormData();
 
-        // Process URIs for both files (remove file:// prefix on iOS)
-        const truthFileUri =
-            Platform.OS === "ios"
-                ? truthLocalUri.replace("file://", "")
-                : truthLocalUri;
+        console.log("=== READING FILES AS BASE64 FOR UPLOAD ===");
 
-        const recordedFileUri =
-            Platform.OS === "ios"
-                ? recordedUri.replace("file://", "")
-                : recordedUri;
+        // Read truth audio as base64 (we already have it from earlier)
+        console.log(
+            "Truth audio already in base64, length:",
+            base64Audio.length
+        );
+
+        // Read recorded audio as base64
+        console.log("Reading recorded audio as base64...");
+        const recordedBase64 = await FileSystem.readAsStringAsync(recordedUri, {
+            encoding: FileSystem.EncodingType.Base64,
+        });
+        console.log("Recorded audio base64 length:", recordedBase64.length);
 
         console.log("=== FORMDATA PREPARATION ===");
-        console.log("Truth file URI for FormData:", truthFileUri);
-        console.log("Recorded file URI for FormData:", recordedFileUri);
 
-        // Add both files as URI objects (React Native FormData format)
-        analysisFormData.append("truth_audio", {
-            uri: truthFileUri,
-            name: "truth_audio.mp3",
-            type: "audio/mpeg",
-        } as any);
-        console.log("✓ Added truth_audio (file URI) to FormData");
+        // Send base64 strings directly - server will decode them
+        analysisFormData.append("truth_audio_base64", base64Audio);
+        analysisFormData.append("truth_audio_filename", "truth_audio.mp3");
+        console.log("✓ Added truth_audio base64 to FormData");
 
-        analysisFormData.append("recorded_audio", {
-            uri: recordedFileUri,
-            name: "recorded_audio.m4a",
-            type: "audio/m4a",
-        } as any);
-        console.log("✓ Added recorded_audio (file URI) to FormData");
+        analysisFormData.append("recorded_audio_base64", recordedBase64);
+        analysisFormData.append(
+            "recorded_audio_filename",
+            "recorded_audio.m4a"
+        );
+        console.log("✓ Added recorded_audio base64 to FormData");
+
         console.log("=== SENDING REQUEST TO SERVER ===");
 
         // Call the analyze endpoint

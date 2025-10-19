@@ -1,6 +1,5 @@
 import { Platform } from "react-native";
-
-const SERVER_URL = "https://134260ef2747.ngrok-free.app";
+import { SERVER_URL } from "../../config";
 
 const createFileObject = (uri: string, name: string, type: string) => {
     const fileUri = Platform.OS === "ios" ? uri.replace("file://", "") : uri;

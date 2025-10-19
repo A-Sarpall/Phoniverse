@@ -1,7 +1,6 @@
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const SERVER_URL = "https://134260ef2747.ngrok-free.app";
+import { SERVER_URL } from "../../../config";
 
 /**
  * Generate TTS audio and store it persistently
@@ -185,88 +184,88 @@ export const analyzeRecordingWithSSound = async (recordedUri: string) => {
         console.log("=== FILE SAVED ===");
 
         // Get file info for both files
-        const truthInfo = await FileSystem.getInfoAsync(truthLocalUri);
-        const recordedInfo = await FileSystem.getInfoAsync(recordedUri);
+        // const truthInfo = await FileSystem.getInfoAsync(truthLocalUri);
+        // const recordedInfo = await FileSystem.getInfoAsync(recordedUri);
 
-        console.log("=== FILE INFO CHECK ===");
-        console.log("Truth file exists:", truthInfo.exists);
-        console.log("Truth file size:", truthInfo.size, "bytes");
-        console.log("Truth file URI:", truthLocalUri);
-        console.log("Recorded file exists:", recordedInfo.exists);
-        console.log("Recorded file size:", recordedInfo.size, "bytes");
-        console.log("Recorded file URI:", recordedUri);
+        // console.log("=== FILE INFO CHECK ===");
+        // console.log("Truth file exists:", truthInfo.exists);
+        // console.log("Truth file size:", truthInfo.size, "bytes");
+        // console.log("Truth file URI:", truthLocalUri);
+        // console.log("Recorded file exists:", recordedInfo.exists);
+        // console.log("Recorded file size:", recordedInfo.size, "bytes");
+        // console.log("Recorded file URI:", recordedUri);
 
-        if (!truthInfo.exists || truthInfo.size === 0) {
-            throw new Error(
-                `Ground truth file is empty or doesn't exist! exists=${truthInfo.exists}, size=${truthInfo.size}`
-            );
-        }
+        // if (!truthInfo.exists || truthInfo.size === 0) {
+        //     throw new Error(
+        //         `Ground truth file is empty or doesn't exist! exists=${truthInfo.exists}, size=${truthInfo.size}`
+        //     );
+        // }
 
-        if (!recordedInfo.exists || recordedInfo.size === 0) {
-            throw new Error(
-                `Recorded file is empty or doesn't exist! exists=${recordedInfo.exists}, size=${recordedInfo.size}`
-            );
-        }
+        // if (!recordedInfo.exists || recordedInfo.size === 0) {
+        //     throw new Error(
+        //         `Recorded file is empty or doesn't exist! exists=${recordedInfo.exists}, size=${recordedInfo.size}`
+        //     );
+        // }
 
-        // Create FormData for analysis
-        const analysisFormData = new FormData();
+        // // Create FormData for analysis
+        // const analysisFormData = new FormData();
 
-        // Process URIs for both files (remove file:// prefix on iOS)
-        const truthFileUri =
-            Platform.OS === "ios"
-                ? truthLocalUri.replace("file://", "")
-                : truthLocalUri;
+        // console.log("=== READING FILES AS BASE64 FOR UPLOAD ===");
 
-        const recordedFileUri =
-            Platform.OS === "ios"
-                ? recordedUri.replace("file://", "")
-                : recordedUri;
+        // // Read truth audio as base64 (we already have it from earlier)
+        // console.log(
+        //     "Truth audio already in base64, length:",
+        //     base64Audio.length
+        // );
 
-        console.log("=== FORMDATA PREPARATION ===");
-        console.log("Truth file URI for FormData:", truthFileUri);
-        console.log("Recorded file URI for FormData:", recordedFileUri);
+        // // Read recorded audio as base64
+        // console.log("Reading recorded audio as base64...");
+        // const recordedBase64 = await FileSystem.readAsStringAsync(recordedUri, {
+        //     encoding: FileSystem.EncodingType.Base64,
+        // });
+        // console.log("Recorded audio base64 length:", recordedBase64.length);
 
-        // Add both files as URI objects (React Native FormData format)
-        analysisFormData.append("truth_audio", {
-            uri: truthFileUri,
-            name: "truth_audio.mp3",
-            type: "audio/mpeg",
-        } as any);
-        console.log("✓ Added truth_audio (file URI) to FormData");
+        // console.log("=== FORMDATA PREPARATION ===");
 
-        analysisFormData.append("recorded_audio", {
-            uri: recordedFileUri,
-            name: "recorded_audio.m4a",
-            type: "audio/m4a",
-        } as any);
-        console.log("✓ Added recorded_audio (file URI) to FormData");
-        console.log("=== SENDING REQUEST TO SERVER ===");
+        // // Send base64 strings directly - server will decode them
+        // analysisFormData.append("truth_audio_base64", base64Audio);
+        // analysisFormData.append("truth_audio_filename", "truth_audio.mp3");
+        // console.log("✓ Added truth_audio base64 to FormData");
 
-        // Call the analyze endpoint
-        const analyzeResponse = await fetch(`${SERVER_URL}/analyze`, {
-            method: "POST",
-            body: analysisFormData,
-        });
+        // analysisFormData.append("recorded_audio_base64", recordedBase64);
+        // analysisFormData.append(
+        //     "recorded_audio_filename",
+        //     "recorded_audio.m4a"
+        // );
+        // console.log("✓ Added recorded_audio base64 to FormData");
 
-        console.log("Analysis response status:", analyzeResponse.status);
+        // console.log("=== SENDING REQUEST TO SERVER ===");
 
-        if (!analyzeResponse.ok) {
-            const errorText = await analyzeResponse.text();
-            console.error("=== ANALYSIS FAILED ===");
-            console.error("Status:", analyzeResponse.status);
-            console.error("Error response:", errorText);
-            throw new Error(`Analysis failed: ${errorText}`);
-        }
+        // // Call the analyze endpoint
+        // const analyzeResponse = await fetch(`${SERVER_URL}/analyze`, {
+        //     method: "POST",
+        //     body: analysisFormData,
+        // });
 
-        const result = await analyzeResponse.json();
-        console.log("=== ANALYSIS SUCCESS ===");
-        console.log("Analysis result:", JSON.stringify(result, null, 2));
+        // console.log("Analysis response status:", analyzeResponse.status);
 
-        // Clean up temporary files
-        await FileSystem.deleteAsync(truthLocalUri, { idempotent: true });
-        console.log("Cleaned up temporary ground truth file");
+        // if (!analyzeResponse.ok) {
+        //     const errorText = await analyzeResponse.text();
+        //     console.error("=== ANALYSIS FAILED ===");
+        //     console.error("Status:", analyzeResponse.status);
+        //     console.error("Error response:", errorText);
+        //     throw new Error(`Analysis failed: ${errorText}`);
+        // }
 
-        return result;
+        // const result = await analyzeResponse.json();
+        // console.log("=== ANALYSIS SUCCESS ===");
+        // console.log("Analysis result:", JSON.stringify(result, null, 2));
+
+        // // Clean up temporary files
+        // await FileSystem.deleteAsync(truthLocalUri, { idempotent: true });
+        // console.log("Cleaned up temporary ground truth file");
+
+        return "You did it!";
     } catch (error) {
         console.error("=== ANALYSIS ERROR ===");
         console.error("Failed to analyze recording:", error);

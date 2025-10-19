@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
@@ -29,7 +29,7 @@ const InitialAssessment = ({ navigation }: any) => {
                 y: Math.random() * screenHeight,
                 size: Math.random() * 2 + 1,
                 opacity: Math.random() * 0.6 + 0.4,
-                color: Math.random() > 0.7 ? '#cce6ff' : '#ffffff',
+                color: Math.random() > 0.7 ? "#cce6ff" : "#ffffff",
             });
         }
         return arr;
@@ -58,7 +58,8 @@ const InitialAssessment = ({ navigation }: any) => {
                 );
 
                 const audioBlob = await createTrainerVoice(
-                    "Repeat this phrase loud and clear!:" + stringsToPronounce[0]
+                    "Repeat this phrase loud and clear!:" +
+                        stringsToPronounce[0]
                 );
 
                 // Convert blob to base64 and play
@@ -68,9 +69,15 @@ const InitialAssessment = ({ navigation }: any) => {
                     const sound = new Audio.Sound();
 
                     await sound.loadAsync({ uri: base64Audio });
+
+                    // Set volume to maximum (1.0 = 100%, 0.0 = 0%)
+                    await sound.setVolumeAsync(1.0);
+
                     await sound.playAsync();
 
-                    console.log("Trainer voice played successfully");
+                    console.log(
+                        "Trainer voice played successfully at max volume"
+                    );
                 };
                 reader.readAsDataURL(audioBlob);
             } catch (error) {
@@ -138,7 +145,7 @@ const InitialAssessment = ({ navigation }: any) => {
                 <View
                     key={star.id}
                     style={{
-                        position: 'absolute',
+                        position: "absolute",
                         left: star.x,
                         top: star.y,
                         width: star.size,
