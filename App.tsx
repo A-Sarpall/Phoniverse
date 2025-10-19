@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
+import {StatusBar} from "react-native";
 
 const Stack = createNativeStackNavigator();
 
@@ -15,19 +16,20 @@ interface Theme {
 export const ThemeContext = createContext<Theme>({
     background: "#160b20",
     text: "#fff",
-    button: "#a100ff",
+    button: "#60359c",
 });
 
 export default function App() {
     const theme = {
         background: "#160b20",
         text: "#fff",
-        button: "#a100ff",
+        button: "#60359c",
     };
 
     return (
         <ThemeContext.Provider value={theme}>
             <NavigationContainer>
+                <StatusBar barStyle='dark-content' />
                 <Stack.Navigator initialRouteName="Welcome">
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
