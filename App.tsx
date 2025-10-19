@@ -5,6 +5,7 @@ import { StatusBar } from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import MainTabs from "./MainTabs";
+import Game from "./OnboardingScreens/Home/Game/Game";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Stack = createNativeStackNavigator();
@@ -52,7 +53,7 @@ export const AvatarContext = createContext<AvatarContextType>({
 });
 
 export default function App() {
-    const [totalPoints, setTotalPoints] = useState(100); // Start with 100 points
+    const [totalPoints, setTotalPoints] = useState(0); // Start with 0 points
     const [purchasedItems, setPurchasedItems] = useState<any[]>([]);
     const [equippedItems, setEquippedItems] = useState<any[]>([]);
 
@@ -73,11 +74,7 @@ export default function App() {
     }, []);
 
     const equipItem = useCallback((item: any) => {
-        setEquippedItems(prev => {
-            // Remove any existing item of the same category
-            const filtered = prev.filter(equipped => equipped.category !== item.category);
-            return [...filtered, item];
-        });
+        setEquippedItems([item]); // Only allow one item to be equipped at a time
     }, []);
 
     const unequipItem = useCallback((itemId: string) => {
@@ -93,8 +90,10 @@ export default function App() {
 
     useEffect(() => {
         (async () => {
-            const value = await AsyncStorage.getItem("hasCompletedOnboarding");
-            setHasCompletedOnboarding(value === "true");
+            // Clear onboarding cache to force fresh onboarding flow
+            await AsyncStorage.removeItem("hasCompletedOnboarding");
+            await AsyncStorage.removeItem("userVoiceId");
+            setHasCompletedOnboarding(false); // Force onboarding to show
         })();
     }, []);
 
@@ -139,13 +138,20 @@ export default function App() {
                             <Stack.Screen
                                 name="Initial Assessment"
                                 component={InitialAssessment}
-                                options={{ title: "Initial Assessment" }}
+                                options={{ headerShown: false }}
                             />
 
                             {/* 🧭 Main app (tab navigation) */}
                             <Stack.Screen
                                 name="MainTabs"
                                 component={MainTabs}
+                                options={{ headerShown: false }}
+                            />
+                            
+                            {/* 🎮 Game screen (accessible from planet taps) */}
+                            <Stack.Screen
+                                name="Game"
+                                component={Game}
                                 options={{ headerShown: false }}
                             />
 

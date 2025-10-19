@@ -1,5 +1,5 @@
-import React, { useContext, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useContext, useEffect, useMemo } from "react";
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { ThemeContext } from "../../App";
@@ -14,8 +14,26 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+
 const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
+
+    // Generate stars for background
+    const stars = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < 100; i++) {
+            arr.push({
+                id: i,
+                x: Math.random() * screenWidth,
+                y: Math.random() * screenHeight,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.6 + 0.4,
+                color: Math.random() > 0.7 ? '#cce6ff' : '#ffffff',
+            });
+        }
+        return arr;
+    }, []);
 
     const {
         isRecording,
@@ -115,6 +133,27 @@ const InitialAssessment = ({ navigation }: any) => {
         <SafeAreaView
             style={[styles.container, { backgroundColor: theme.background }]}
         >
+            {/* Stars Background */}
+            {stars.map((star) => (
+                <View
+                    key={star.id}
+                    style={{
+                        position: 'absolute',
+                        left: star.x,
+                        top: star.y,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: star.size / 2,
+                        backgroundColor: star.color,
+                        opacity: star.opacity,
+                        shadowColor: star.color,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 2,
+                        elevation: 3,
+                    }}
+                />
+            ))}
             <View style={styles.topContainer}>
                 <Text style={styles.instructionText}>
                     Repeat this phrase loud and clear!:

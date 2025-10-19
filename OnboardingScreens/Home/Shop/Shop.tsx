@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, Dimensions, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { PointsContext, AvatarContext } from '../../../App';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const itemSize = (screenWidth - 80) / 2; // 2 columns with padding
 
 // Array of shop items with categories and positioning
@@ -11,7 +11,7 @@ const shopItems = [
     { 
         id: '1', 
         name: 'Beanie', 
-        image: require('../../../assets/HackTX Drawings/Beanie.png'), 
+        image: require('../../../assets/singleitems/beanie.png'), 
         price: 50,
         category: 'head' as const,
         position: { x: 50, y: 10, width: 100, height: 80 }
@@ -19,7 +19,7 @@ const shopItems = [
     { 
         id: '2', 
         name: 'Chain', 
-        image: require('../../../assets/HackTX Drawings/goldchain.png'), 
+        image: require('../../../assets/singleitems/chain.png'), 
         price: 75,
         category: 'neck' as const,
         position: { x: 60, y: 80, width: 80, height: 40 }
@@ -27,7 +27,7 @@ const shopItems = [
     { 
         id: '3', 
         name: 'Cowboy Hat', 
-        image: require('../../../assets/HackTX Drawings/cowboyhat.png'), 
+        image: require('../../../assets/singleitems/cowboyhat.png'), 
         price: 100,
         category: 'head' as const,
         position: { x: 40, y: 5, width: 120, height: 90 }
@@ -35,7 +35,7 @@ const shopItems = [
     { 
         id: '4', 
         name: 'Headphones', 
-        image: require('../../../assets/HackTX Drawings/headphones.png'), 
+        image: require('../../../assets/singleitems/headphones.png'), 
         price: 80,
         category: 'head' as const,
         position: { x: 30, y: 20, width: 140, height: 70 }
@@ -43,7 +43,7 @@ const shopItems = [
     { 
         id: '5', 
         name: 'Purse', 
-        image: require('../../../assets/HackTX Drawings/Purse.png'), 
+        image: require('../../../assets/singleitems/purse.png'), 
         price: 60,
         category: 'hands' as const,
         position: { x: 120, y: 140, width: 60, height: 50 }
@@ -51,7 +51,7 @@ const shopItems = [
     { 
         id: '6', 
         name: 'Scarf', 
-        image: require('../../../assets/HackTX Drawings/scarf.png'), 
+        image: require('../../../assets/singleitems/scarf.png'), 
         price: 40,
         category: 'neck' as const,
         position: { x: 50, y: 70, width: 100, height: 60 }
@@ -59,7 +59,7 @@ const shopItems = [
     { 
         id: '7', 
         name: 'Spin Hat', 
-        image: require('../../../assets/HackTX Drawings/spinhat.png'), 
+        image: require('../../../assets/singleitems/spinhat.png'), 
         price: 90,
         category: 'head' as const,
         position: { x: 45, y: 8, width: 110, height: 85 }
@@ -67,7 +67,7 @@ const shopItems = [
     { 
         id: '8', 
         name: 'Sunglasses', 
-        image: require('../../../assets/HackTX Drawings/Sunglasses.png'), 
+        image: require('../../../assets/singleitems/sunglasses.png'), 
         price: 70,
         category: 'head' as const,
         position: { x: 60, y: 50, width: 80, height: 30 }
@@ -75,7 +75,7 @@ const shopItems = [
     { 
         id: '9', 
         name: 'Tie', 
-        image: require('../../../assets/HackTX Drawings/tie.png'), 
+        image: require('../../../assets/singleitems/tie.png'), 
         price: 55,
         category: 'neck' as const,
         position: { x: 70, y: 85, width: 60, height: 50 }
@@ -83,7 +83,7 @@ const shopItems = [
     { 
         id: '10', 
         name: 'Top Hat', 
-        image: require('../../../assets/HackTX Drawings/tophat.png'), 
+        image: require('../../../assets/singleitems/tophat.png'), 
         price: 120,
         category: 'head' as const,
         position: { x: 55, y: 0, width: 90, height: 100 }
@@ -91,6 +91,21 @@ const shopItems = [
 ];
 
 export default function Shop() {
+    // Generate stars for background
+    const stars = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < 100; i++) {
+            arr.push({
+                id: i,
+                x: Math.random() * screenWidth,
+                y: Math.random() * screenHeight,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.6 + 0.4,
+                color: Math.random() > 0.7 ? '#cce6ff' : '#ffffff',
+            });
+        }
+        return arr;
+    }, []);
     const pointsContext = useContext(PointsContext);
     const avatarContext = useContext(AvatarContext);
     const navigation = useNavigation<any>();
@@ -162,27 +177,32 @@ export default function Shop() {
 
     return (
         <View style={styles.container}>
+            {/* Stars Background */}
+            {stars.map((star) => (
+                <View
+                    key={star.id}
+                    style={{
+                        position: 'absolute',
+                        left: star.x,
+                        top: star.y,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: star.size / 2,
+                        backgroundColor: star.color,
+                        opacity: star.opacity,
+                        shadowColor: star.color,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 2,
+                        elevation: 3,
+                    }}
+                />
+            ))}
             <Text style={styles.title}>🛒 Shop</Text>
             <Text style={styles.subtitle}>Customize your avatar with these items!</Text>
             
             <View style={styles.currencyContainer}>
                 <Text style={styles.currency}>💰 Points: {totalPoints}</Text>
-                <TouchableOpacity 
-                    style={styles.testButton}
-                    onPress={() => {
-                        console.log('Testing spendPoints:', typeof spendPoints);
-                        console.log('Current points before:', totalPoints);
-                        if (typeof spendPoints === 'function') {
-                            spendPoints(10);
-                            console.log('spendPoints called successfully');
-                            console.log('Points should now be:', totalPoints - 10);
-                        } else {
-                            console.log('spendPoints is not a function');
-                        }
-                    }}
-                >
-                    <Text style={styles.testButtonText}>Test Spend 10 Points</Text>
-                </TouchableOpacity>
             </View>
 
             <FlatList
@@ -194,32 +214,6 @@ export default function Shop() {
                 columnWrapperStyle={styles.row}
             />
 
-            {/* Bottom Navigation Bar */}
-            <View style={styles.navbar}>
-                <TouchableOpacity 
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Home')}
-                >
-                    <Text style={styles.navIcon}>🏠</Text>
-                    <Text style={styles.navLabel}>Home</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Avatar')}
-                >
-                    <Text style={styles.navIcon}>👤</Text>
-                    <Text style={styles.navLabel}>Avatar</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={[styles.navItem, styles.activeNavItem]}
-                    onPress={() => navigation.navigate('Shop')}
-                >
-                    <Text style={styles.navIcon}>🛒</Text>
-                    <Text style={styles.navLabel}>Shop</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }
@@ -316,58 +310,5 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 2,
         textTransform: 'capitalize',
-    },
-    testButton: {
-        backgroundColor: '#60359c',
-        borderRadius: 10,
-        padding: 10,
-        marginTop: 10,
-    },
-    testButtonText: {
-        color: '#fff',
-        fontSize: 12,
-        textAlign: 'center',
-    },
-    navbar: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 80,
-        backgroundColor: 'rgba(22, 11, 32, 0.95)',
-        borderTopWidth: 1,
-        borderTopColor: '#60359c',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        paddingBottom: 20,
-        paddingTop: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: -2,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 8,
-        zIndex: 10,
-    },
-    navItem: {
-        alignItems: 'center',
-        flex: 1,
-        paddingVertical: 5,
-    },
-    activeNavItem: {
-        backgroundColor: 'rgba(96, 53, 156, 0.3)',
-        borderRadius: 10,
-    },
-    navIcon: {
-        fontSize: 24,
-        marginBottom: 4,
-    },
-    navLabel: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: '500',
     },
 });

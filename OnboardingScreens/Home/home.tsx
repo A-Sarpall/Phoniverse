@@ -319,32 +319,6 @@ export default function HomePage({ route, navigation }: any) {
                 <Text style={styles.pointsText}>{totalPoints}</Text>
             </View>
 
-            {/* Bottom Navigation Bar */}
-            <View style={styles.navbar}>
-                <TouchableOpacity 
-                    style={[styles.navItem, styles.activeNavItem]}
-                    onPress={() => navigation.navigate('Home')}
-                >
-                    <Text style={styles.navIcon}>🏠</Text>
-                    <Text style={styles.navLabel}>Home</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Avatar')}
-                >
-                    <Text style={styles.navIcon}>👤</Text>
-                    <Text style={styles.navLabel}>Avatar</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                    style={styles.navItem}
-                    onPress={() => navigation.navigate('Shop')}
-                >
-                    <Text style={styles.navIcon}>🛒</Text>
-                    <Text style={styles.navLabel}>Shop</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 }
@@ -425,48 +399,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    navbar: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 80,
-        backgroundColor: 'rgba(22, 11, 32, 0.95)',
-        borderTopWidth: 1,
-        borderTopColor: '#60359c',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        paddingBottom: 20,
-        paddingTop: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: -2,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 8,
-        zIndex: 10,
-    },
-    navItem: {
-        alignItems: 'center',
-        flex: 1,
-        paddingVertical: 5,
-    },
-    activeNavItem: {
-        backgroundColor: 'rgba(96, 53, 156, 0.3)',
-        borderRadius: 10,
-    },
-    navIcon: {
-        fontSize: 24,
-        marginBottom: 4,
-    },
-    navLabel: {
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: '500',
     },
 
 });

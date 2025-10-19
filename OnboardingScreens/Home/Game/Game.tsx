@@ -89,7 +89,10 @@ export default function Game() {
           onPress={() => {
             // Mark mission as completed and update spaceship position
             console.log(`Mission completed for Planet ${planetNumber}`);
-            navigation.navigate('Home', { completedPlanet: planetNumber });
+            navigation.navigate('MainTabs', { 
+              screen: 'Home', 
+              params: { completedPlanet: planetNumber } 
+            });
           }}
         >
           <Text style={styles.finishButtonText}>✅ Finish Mission</Text>

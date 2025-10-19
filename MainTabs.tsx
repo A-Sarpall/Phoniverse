@@ -5,14 +5,13 @@ import {
     faHome,
     faGamepad,
     faUser,
-    faStore, faPlay,
+    faStore,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThemeContext } from "./App";
 import HomePage from "./OnboardingScreens/Home/home";
 import Minigames from "./OnboardingScreens/Home/Minigames/Minigames";
 import Avatar from "./OnboardingScreens/Home/Avatar/Avatar";
 import Shop from "./OnboardingScreens/Home/Shop/Shop";
-import Game from "./OnboardingScreens/Home/Game/Game";
 
 const Tab = createBottomTabNavigator();
 
@@ -23,7 +22,13 @@ const MainTabs = () => {
         <Tab.Navigator
             screenOptions={{
                 headerShown: false,
-                tabBarStyle: { backgroundColor: "#392059" },
+                tabBarStyle: { 
+                    backgroundColor: "#392059",
+                    borderTopWidth: 0,
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    height: 60,
+                },
                 tabBarActiveTintColor: theme.button,
                 tabBarInactiveTintColor: "#aaa",
             }}
@@ -62,22 +67,6 @@ const MainTabs = () => {
                     tabBarIcon: ({ color }) => (
                         <FontAwesomeIcon icon={faStore} size={20} color={color} />
                     ),
-                }}
-            />
-            <Tab.Screen
-                name="Game"
-                component={Game}
-                options={{
-                    tabBarIcon: ({ color }) => (
-                        <FontAwesomeIcon icon={faPlay} size={20} color={color} />
-                    ),
-                    headerShown: true,
-                    tabBarStyle: {
-                        display: 'none'
-                    },
-                    headerStyle: { backgroundColor: "#392059" },
-                    headerTitleStyle: { color: "#fff" },
-                    headerTintColor: "#fff",
                 }}
             />
         </Tab.Navigator>

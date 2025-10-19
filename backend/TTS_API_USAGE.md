@@ -26,7 +26,7 @@ Generate speech from text using ElevenLabs.
 **Example (curl):**
 
 ```bash
-curl -X POST "http://localhost:8000/tts/generate" \
+curl -X POST "https://fcf604385834.ngrok-free.app/tts/generate" \
   -F "text=Hello, this is a test" \
   -F "speed=0.8" \
   -o output.mp3
@@ -39,7 +39,7 @@ const formData = new FormData();
 formData.append("text", "Hello, this is a test");
 formData.append("speed", "0.8");
 
-const response = await fetch("http://localhost:8000/tts/generate", {
+const response = await fetch("https://fcf604385834.ngrok-free.app/tts/generate", {
     method: "POST",
     body: formData,
 });
@@ -67,7 +67,7 @@ Combine multiple audio files with pauses in between.
 **Example (curl):**
 
 ```bash
-curl -X POST "http://localhost:8000/tts/stitch" \
+curl -X POST "https://fcf604385834.ngrok-free.app/tts/stitch" \
   -F "audio_files=@file1.mp3" \
   -F "audio_files=@file2.mp3" \
   -F "audio_files=@file3.mp3" \
@@ -84,7 +84,7 @@ formData.append("audio_files", file2);
 formData.append("audio_files", file3);
 formData.append("pause_duration", "1000");
 
-const response = await fetch("http://localhost:8000/tts/stitch", {
+const response = await fetch("https://fcf604385834.ngrok-free.app/tts/stitch", {
     method: "POST",
     body: formData,
 });
@@ -111,7 +111,7 @@ Create a custom voice clone from an audio sample.
 **Example (curl):**
 
 ```bash
-curl -X POST "http://localhost:8000/tts/clone" \
+curl -X POST "https://fcf604385834.ngrok-free.app/tts/clone" \
   -F "audio_file=@voice_sample.mp3" \
   -F "name=MyVoice" \
   -F "description=My custom voice"
@@ -136,7 +136,7 @@ formData.append("audio_file", audioFile); // File object
 formData.append("name", "MyVoice");
 formData.append("description", "My custom voice");
 
-const response = await fetch("http://localhost:8000/tts/clone", {
+const response = await fetch("https://fcf604385834.ngrok-free.app/tts/clone", {
     method: "POST",
     body: formData,
 });
@@ -153,12 +153,12 @@ console.log("Voice ID:", result.voice_id);
 ```bash
 cd backend
 python server.py
-# Server runs on http://localhost:8000
+# Server runs on https://fcf604385834.ngrok-free.app
 ```
 
 ## Testing with Swagger UI
 
-Visit `http://localhost:8000/docs` to see interactive API documentation and test the endpoints.
+Visit `https://fcf604385834.ngrok-free.app/docs` to see interactive API documentation and test the endpoints.
 
 ---
 
@@ -170,7 +170,7 @@ const generateSpeech = async (text) => {
     const formData = new FormData();
     formData.append("text", text);
 
-    const response = await fetch("http://localhost:8000/tts/generate", {
+    const response = await fetch("https://fcf604385834.ngrok-free.app/tts/generate", {
         method: "POST",
         body: formData,
     });
@@ -187,7 +187,7 @@ const stitchAudios = async (audioFiles) => {
     });
     formData.append("pause_duration", "500");
 
-    const response = await fetch("http://localhost:8000/tts/stitch", {
+    const response = await fetch("https://fcf604385834.ngrok-free.app/tts/stitch", {
         method: "POST",
         body: formData,
     });
@@ -201,7 +201,7 @@ const createVoiceClone = async (audioFile, name) => {
     formData.append("audio_file", audioFile);
     formData.append("name", name);
 
-    const response = await fetch("http://localhost:8000/tts/clone", {
+    const response = await fetch("https://fcf604385834.ngrok-free.app/tts/clone", {
         method: "POST",
         body: formData,
     });
