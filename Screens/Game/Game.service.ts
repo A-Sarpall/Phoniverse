@@ -103,52 +103,70 @@ export const clearAudioCache = async () => {
 export const analyzeRecordingWithSSound = async (recordedUri: string) => {
     try {
         console.log("Analyzing recording against S sound...");
+        console.log("Recorded URI:", recordedUri);
 
-        // First, generate the "Ssssss" audio file
-        const formData = new FormData();
-        formData.append("text", "Ssssss");
+        // Use the pre-existing s_sound.mp3 file from the server
+        const sSoundUrl = `${SERVER_URL}/audio/s_sound.mp3`;
 
-        const ttsResponse = await fetch(`${SERVER_URL}/tts/generate`, {
-            method: "POST",
-            body: formData,
-        });
+        console.log("Fetching S sound from server:", sSoundUrl);
 
-        if (!ttsResponse.ok) {
-            const errorText = await ttsResponse.text();
-            throw new Error(`TTS generation failed: ${errorText}`);
+        // Download the S sound file
+        const sSoundResponse = await fetch(sSoundUrl);
+
+        if (!sSoundResponse.ok) {
+            throw new Error(
+                `Failed to fetch S sound: ${sSoundResponse.statusText}`
+            );
         }
 
-        // Get the TTS audio blob
-        const ttsBlob = await ttsResponse.blob();
+        const sSoundBlob = await sSoundResponse.blob();
+        console.log("S sound blob size:", sSoundBlob.size);
+        console.log("S sound blob type:", sSoundBlob.type);
 
         // Create FormData for analysis
         const analysisFormData = new FormData();
 
-        // Add the TTS audio as truth_audio
+        // Add the S sound audio as truth_audio
+        // React Native FormData requires the object format with uri, name, and type
         analysisFormData.append("truth_audio", {
-            uri: ttsBlob,
-            name: "truth_audio.mp3",
+            uri: sSoundUrl,
+            name: "s_sound.mp3",
             type: "audio/mpeg",
         } as any);
 
-        // Add the recorded audio
+        console.log("Added truth_audio to FormData");
+
+        // Add the recorded audio (as a file)
+        const recordedFileUri =
+            Platform.OS === "ios"
+                ? recordedUri.replace("file://", "")
+                : recordedUri;
+
+        console.log("Processed recorded URI:", recordedFileUri);
+
         analysisFormData.append("recorded_audio", {
-            uri:
-                Platform.OS === "ios"
-                    ? recordedUri.replace("file://", "")
-                    : recordedUri,
+            uri: recordedFileUri,
             name: "recorded_audio.wav",
             type: "audio/wav",
         } as any);
+
+        console.log("Added recorded_audio to FormData");
+        console.log("Sending analysis request to server...");
 
         // Call the analyze endpoint
         const analyzeResponse = await fetch(`${SERVER_URL}/analyze`, {
             method: "POST",
             body: analysisFormData,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
         });
+
+        console.log("Analysis response status:", analyzeResponse.status);
 
         if (!analyzeResponse.ok) {
             const errorText = await analyzeResponse.text();
+            console.error("Analysis failed:", errorText);
             throw new Error(`Analysis failed: ${errorText}`);
         }
 
@@ -158,6 +176,7 @@ export const analyzeRecordingWithSSound = async (recordedUri: string) => {
         return result;
     } catch (error) {
         console.error("Failed to analyze recording:", error);
+        console.error("Error details:", JSON.stringify(error, null, 2));
         throw error;
     }
 };

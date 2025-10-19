@@ -8,11 +8,10 @@ import {
     faStore, faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThemeContext } from "./App";
-import HomePage from "./OnboardingScreens/Home/home";
-import Minigames from "./OnboardingScreens/Home/Minigames/Minigames";
-import Avatar from "./OnboardingScreens/Home/Avatar/Avatar";
-import Shop from "./OnboardingScreens/Home/Shop/Shop";
-import Game from "./OnboardingScreens/Home/Game/Game";
+import Avatar from "./Screens/Avatar/Avatar";
+import Shop from "./Screens/Shop/Shop";
+import Game from "./Screens/Game/Game";
+import HomePage from "./Screens/Home/Home";
 
 const Tab = createBottomTabNavigator();
 
