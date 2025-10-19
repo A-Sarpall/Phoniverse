@@ -1,20 +1,30 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import OpeningPage from './OpeningPage';
+import VoiceInputPage from './VoiceInputPage';
+import HomePage from './HomePage';
 
 export default function App() {
+  const [currentPage, setCurrentPage] = useState('opening');
+
+  const navigateToVoiceInput = () => {
+    setCurrentPage('voiceInput');
+  };
+
+  const navigateBack = () => {
+    setCurrentPage('opening');
+  };
+
+  const navigateToHome = () => {
+    setCurrentPage('home');
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <>
+      {currentPage === 'opening' && <OpeningPage onGetStarted={navigateToVoiceInput} />}
+      {currentPage === 'voiceInput' && <VoiceInputPage onBack={navigateBack} onComplete={navigateToHome} />}
+      {currentPage === 'home' && <HomePage />}
       <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
