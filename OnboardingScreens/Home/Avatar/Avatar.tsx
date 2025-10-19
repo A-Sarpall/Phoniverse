@@ -13,6 +13,34 @@ import { AvatarContext, PointsContext } from "../../../App";
 
 const { width: screenWidth } = Dimensions.get("window");
 
+// Image mapping for single items
+const singleItemImages: { [key: string]: any } = {
+    Beanie: require("../../../assets/singleitems/beanie.png"),
+    Chain: require("../../../assets/singleitems/chain.png"),
+    "Cowboy Hat": require("../../../assets/singleitems/cowboyhat.png"),
+    Headphones: require("../../../assets/singleitems/headphones.png"),
+    Purse: require("../../../assets/singleitems/purse.png"),
+    Scarf: require("../../../assets/singleitems/scarf.png"),
+    "Spin Hat": require("../../../assets/singleitems/spinhat.png"),
+    Sunglasses: require("../../../assets/singleitems/sunglasses.png"),
+    Tie: require("../../../assets/singleitems/tie.png"),
+    "Top Hat": require("../../../assets/singleitems/tophat.png"),
+};
+
+// Image mapping for HackTX Alien items
+const alienItemImages: { [key: string]: any } = {
+    Beanie: require("../../../assets/HackTX Alien/Beanie.png"),
+    Chain: require("../../../assets/HackTX Alien/goldchain.png"),
+    "Cowboy Hat": require("../../../assets/HackTX Alien/cowboyhat.png"),
+    Headphones: require("../../../assets/HackTX Alien/headphones.png"),
+    Purse: require("../../../assets/HackTX Alien/Purse.png"),
+    Scarf: require("../../../assets/HackTX Alien/scarf.png"),
+    "Spin Hat": require("../../../assets/HackTX Alien/spinhat.png"),
+    Sunglasses: require("../../../assets/HackTX Alien/Sunglasses.png"),
+    Tie: require("../../../assets/HackTX Alien/tie.png"),
+    "Top Hat": require("../../../assets/HackTX Alien/tophat.png"),
+};
+
 // All available cosmetic items (same as shop)
 const cosmeticItems = [
     {
@@ -128,14 +156,17 @@ export default function Avatar() {
                 handleItemSelect(item);
             }}
         >
-            <Image source={item.name} style={styles.cosmeticImage} />
+            <Image
+                source={singleItemImages[item.name]}
+                style={styles.cosmeticImage}
+            />
             <Text
                 style={[
                     styles.cosmeticName,
                     isItemEquipped(item.id) && styles.equippedText,
                 ]}
             >
-                {item.name}
+                {`${item.name}`}
             </Text>
             {isItemEquipped(item.id) && (
                 <View style={styles.equippedBadge}>
@@ -157,7 +188,7 @@ export default function Avatar() {
                         {equippedItems.length > 0 ? (
                             // Show the first equipped item as the main avatar
                             <Image
-                                source={equippedItems[0].image}
+                                source={alienItemImages[equippedItems[0].name]}
                                 style={styles.baseAvatar}
                             />
                         ) : (
