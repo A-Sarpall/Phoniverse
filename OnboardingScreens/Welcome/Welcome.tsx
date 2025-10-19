@@ -1,10 +1,32 @@
-import React from "react";
-import { View, Text } from "react-native";
+import React, { useContext } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { styles } from "./Welcome.style";
+import {ThemeContext} from "../../App";
 
-const Welcome = () => {
+const Welcome = ({ navigation }: any) => {
+    const theme = useContext(ThemeContext);
+
+    const handleGetStarted = () => {
+        navigation.navigate("Initial Assessment");
+    };
+
     return (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <Text>Welcome Screen</Text>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <View style={styles.content}>
+                <Text style={[styles.title, { color: theme.text }]}>
+                    hey, welcome to appName!
+                </Text>
+                <Text style={[styles.subtitle, { color: theme.text }]}>
+                    we just need a couple of short audio clips from you to get started.
+                </Text>
+            </View>
+
+            <TouchableOpacity
+                style={[styles.button, { backgroundColor: theme.button }]}
+                onPress={handleGetStarted}
+            >
+                <Text style={styles.buttonText}>get started</Text>
+            </TouchableOpacity>
         </View>
     );
 };
