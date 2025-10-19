@@ -96,3 +96,68 @@ export const clearAudioCache = async () => {
         console.error("Failed to clear audio cache:", error);
     }
 };
+
+/**
+ * Analyze recorded audio against "Ssssss" sound
+ */
+export const analyzeRecordingWithSSound = async (recordedUri: string) => {
+    try {
+        console.log("Analyzing recording against S sound...");
+
+        // First, generate the "Ssssss" audio file
+        const formData = new FormData();
+        formData.append("text", "Ssssss");
+
+        const ttsResponse = await fetch(`${SERVER_URL}/tts/generate`, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!ttsResponse.ok) {
+            const errorText = await ttsResponse.text();
+            throw new Error(`TTS generation failed: ${errorText}`);
+        }
+
+        // Get the TTS audio blob
+        const ttsBlob = await ttsResponse.blob();
+
+        // Create FormData for analysis
+        const analysisFormData = new FormData();
+
+        // Add the TTS audio as truth_audio
+        analysisFormData.append("truth_audio", {
+            uri: ttsBlob,
+            name: "truth_audio.mp3",
+            type: "audio/mpeg",
+        } as any);
+
+        // Add the recorded audio
+        analysisFormData.append("recorded_audio", {
+            uri:
+                Platform.OS === "ios"
+                    ? recordedUri.replace("file://", "")
+                    : recordedUri,
+            name: "recorded_audio.wav",
+            type: "audio/wav",
+        } as any);
+
+        // Call the analyze endpoint
+        const analyzeResponse = await fetch(`${SERVER_URL}/analyze`, {
+            method: "POST",
+            body: analysisFormData,
+        });
+
+        if (!analyzeResponse.ok) {
+            const errorText = await analyzeResponse.text();
+            throw new Error(`Analysis failed: ${errorText}`);
+        }
+
+        const result = await analyzeResponse.json();
+        console.log("Analysis result:", result);
+
+        return result;
+    } catch (error) {
+        console.error("Failed to analyze recording:", error);
+        throw error;
+    }
+};
