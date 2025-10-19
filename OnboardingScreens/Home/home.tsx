@@ -10,13 +10,14 @@ export default function HomePage({ route }) {
   const [isSpaceshipTravelling, setIsSpaceshipTravelling] = useState(false); // Track spaceship animation state
   
   // Animation values for smooth spaceship movement
-  const spaceshipOpacity = useRef(new Animated.Value(1)).current;
-  const spaceshipScale = useRef(new Animated.Value(1)).current;
   const spaceshipX = useRef(new Animated.Value(0)).current;
   const spaceshipY = useRef(new Animated.Value(0)).current;
+  const spaceshipOpacity = useRef(new Animated.Value(1)).current;
   
   // Ref for ScrollView to enable auto-scrolling
   const scrollViewRef = useRef(null);
+  
+  // Update completed planets when returning from Game screen
   
   // Update completed planets when returning from Game screen
   useFocusEffect(
@@ -82,13 +83,27 @@ export default function HomePage({ route }) {
               // Remove the animation listener
               spaceshipY.removeListener(animationListener);
               
-              // Animation complete - update position and switch to normal spaceship
-              setCurrentSpaceshipPosition(nextPosition);
-              setIsSpaceshipTravelling(false);
-              
-              // Reset position for normal display
-              spaceshipX.setValue(0);
-              spaceshipY.setValue(0);
+              // Fade out travelling spaceship smoothly
+              Animated.timing(spaceshipOpacity, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+              }).start(() => {
+                // Update position and switch to normal spaceship
+                setCurrentSpaceshipPosition(nextPosition);
+                setIsSpaceshipTravelling(false);
+                
+                // Reset position for normal display
+                spaceshipX.setValue(0);
+                spaceshipY.setValue(0);
+                
+                // Fade back in at new position
+                Animated.timing(spaceshipOpacity, {
+                  toValue: 1,
+                  duration: 200,
+                  useNativeDriver: true,
+                }).start();
+              });
             });
           }
         }
@@ -201,15 +216,15 @@ export default function HomePage({ route }) {
             <TouchableOpacity 
               style={[
                 styles.numberLabel,
-                completedPlanets.has(item.number) && styles.completedLabel
+                item.number < currentSpaceshipPosition && styles.completedLabel
               ]}
               onPress={() => navigation.navigate('Game', { planetNumber: item.number })}
             >
               <Text style={[
                 styles.numberText,
-                completedPlanets.has(item.number) && styles.completedText
+                item.number < currentSpaceshipPosition && styles.completedText
               ]}>
-                {completedPlanets.has(item.number) ? '✓' : item.number}
+                {item.number < currentSpaceshipPosition ? '✓' : item.number}
               </Text>
             </TouchableOpacity>
             
@@ -235,6 +250,7 @@ export default function HomePage({ route }) {
                   { translateX: spaceshipX },
                   { translateY: spaceshipY }
                 ],
+                opacity: spaceshipOpacity,
               }
             ]}
           >
