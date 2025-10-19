@@ -208,7 +208,6 @@ async def create_voice_clone(
     Returns the voice ID and details.
     """
     try:
-        
         # Read audio file
         audio_bytes = await audio_file.read()
 

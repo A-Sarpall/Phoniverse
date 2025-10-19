@@ -8,6 +8,7 @@ import { styles } from "./InitialAssessment.style";
 import useInitialAssessment from "./useInitialAssessment";
 import { analyzeRecording, createVoiceClone } from "./InitialAssessment.service";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {ElevenLabsClient} from "@elevenlabs/elevenlabs-js";
 
 const InitialAssessment = ({ navigation }: any) => {
     const theme = useContext(ThemeContext);
@@ -29,7 +30,7 @@ const InitialAssessment = ({ navigation }: any) => {
 
             try {
                 const cloneResult = await createVoiceClone(uri!, "userClone", "User's custom voice clone");
-                console.log("Voice ID:", cloneResult.voice_id);
+                console.log("Voice ID:", cloneResult);
             } catch (err) {
                 console.error(err);
             }

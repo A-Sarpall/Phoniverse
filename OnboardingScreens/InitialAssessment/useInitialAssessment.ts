@@ -76,6 +76,7 @@ const useInitialAssessment = () => {
         setIsDoneRecording,
         recordingUri,
         recorderState,
+        audioRecorder,
     };
 };
 
