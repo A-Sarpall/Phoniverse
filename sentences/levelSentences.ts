@@ -1,5 +1,5 @@
 export const levelSentences = [
-    '“Ssssss.” (Hold the /s/ sound for 2 seconds.)',
+    '“Sally sells seashells by the seashore.”',
     '“Say these words: see, sip, sue.”',
     '“Now: past, list, fast, toast.”',
     '“Sam sings softly at sunrise.”',

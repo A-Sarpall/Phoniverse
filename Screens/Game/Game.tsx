@@ -18,7 +18,7 @@ import { levelSentences } from "../../sentences/levelSentences";
 import useGame from "./useGame";
 import { stitchMissionAudio, analyzeRecordingWithSSound } from "./Game.service";
 
-const SERVER_URL = "https://fcf604385834.ngrok-free.app";
+const SERVER_URL = "https://134260ef2747.ngrok-free.app";
 
 const Game = ({ navigation }: any) => {
     const route = useRoute();

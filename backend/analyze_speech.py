@@ -18,7 +18,17 @@ from scipy.stats import kurtosis
 
 def load_audio(audio_path, target_sr=16000):
     """Load audio file and resample to target sample rate."""
+    import logging
+
+    logger = logging.getLogger(__name__)
+
+    logger.info(f"Loading audio from: {audio_path}")
     audio, sr = librosa.load(audio_path, sr=target_sr)
+    logger.info(f"Loaded audio: {len(audio)} samples, duration: {len(audio)/sr:.2f}s")
+
+    if len(audio) == 0:
+        raise ValueError(f"Audio file is empty: {audio_path}")
+
     return audio, sr
 
 
@@ -185,53 +195,61 @@ def analyze_speech(truth_path, recorded_path):
             "total": int
         }
     """
-    processor, model, device = get_model()
+    import logging
 
-    # Load audio
-    audio_truth, sr_truth = load_audio(truth_path)
-    audio_rec, sr_rec = load_audio(recorded_path)
+    logger = logging.getLogger(__name__)
 
-    # Get transcriptions
-    transcription_truth, logits_truth = get_transcription(
-        audio_truth, processor, model, device
-    )
-    transcription_rec, logits_rec = get_transcription(
-        audio_rec, processor, model, device
-    )
+    try:
+        processor, model, device = get_model()
+        logger.info("Model loaded successfully")
 
-    # Initialize counts
-    lisp_counts = {
-        "interdental": 0,
-        "palatal": 0,
-        "lateral": 0,
-        "dentalized": 0,
-        "total": 0,
-    }
+        # Load audio
+        logger.info(f"Loading truth audio from: {truth_path}")
+        audio_truth, sr_truth = load_audio(truth_path)
+        logger.info(f"Truth audio loaded: {len(audio_truth)} samples at {sr_truth}Hz")
 
-    # Get total /s/ sounds from truth audio (expected count)
-    truth_sibilant_regions = find_sibilant_regions(
-        audio_truth, logits_truth, processor, sr_truth
-    )
-    lisp_counts["total"] = len(truth_sibilant_regions)
+        logger.info(f"Loading recorded audio from: {recorded_path}")
+        audio_rec, sr_rec = load_audio(recorded_path)
+        logger.info(f"Recorded audio loaded: {len(audio_rec)} samples at {sr_rec}Hz")
 
-    # Step 1: Phoneme substitution analysis
-    # Detects when /s/ is completely replaced (e.g., s→th, s→sh)
-    substitutions = detect_phoneme_substitutions(transcription_truth, transcription_rec)
-    for sub_type in substitutions:
-        lisp_counts[sub_type] += 1
+        # Get transcriptions
+        logger.info("Getting truth transcription...")
+        transcription_truth, logits_truth = get_transcription(
+            audio_truth, processor, model, device
+        )
+        logger.info(f"Truth transcription: '{transcription_truth}'")
 
-    # Step 2: Acoustic analysis
-    # Analyzes /s/ sounds that were actually produced
-    sibilant_regions = find_sibilant_regions(audio_rec, logits_rec, processor, sr_rec)
+        logger.info("Getting recorded transcription...")
+        transcription_rec, logits_rec = get_transcription(
+            audio_rec, processor, model, device
+        )
+        logger.info(f"Recorded transcription: '{transcription_rec}'")
 
-    for start_time, end_time in sibilant_regions:
-        features = extract_acoustic_features(audio_rec, sr_rec, start_time, end_time)
-        if features:
-            classification = classify_acoustic_lisp(features)
-            if classification != "normal":
-                lisp_counts[classification] += 1
+        logger.info(f"Recorded transcription: '{transcription_rec}'")
 
-    return lisp_counts
+        # Initialize counts
+        lisp_counts = {
+            "interdental": 0,
+            "palatal": 0,
+            "lateral": 0,
+            "dentalized": 0,
+            "total": 0,
+        }
+
+        # Return transcriptions for the UI
+        return {
+            "truth_transcription": transcription_truth,
+            "recorded_transcription": transcription_rec,
+            "lisp_analysis": lisp_counts,
+        }
+
+    except Exception as e:
+        logger.error(f"Error in analyze_speech: {str(e)}")
+        logger.error(f"Error type: {type(e).__name__}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise
 
 
 def main():

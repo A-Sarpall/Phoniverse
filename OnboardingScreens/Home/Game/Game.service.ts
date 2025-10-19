@@ -58,13 +58,18 @@ export const stitchMissionAudio = async (level: number) => {
         console.log(`Generating mission audio for level ${level}...`);
 
         if (level === 1) {
-            // Generate TTS for the mission phrase with a longer tongue twister
+            // Generate TTS for the mission phrase with the tongue twister
             console.log("Generating mission audio...");
             const formData = new FormData();
             formData.append(
                 "text",
-                "Repeat after me cadet!: Sally sells sea shells by the sea shore. She sells sea shells surely. The shells she sells are surely sea shells. So if she sells shells on the seashore, I'm sure she sells seashore shells."
+                "Repeat after me cadet!: Sally sells sea shells by the sea shore"
             );
+
+            let userVoiceId = await AsyncStorage.getItem("userVoiceId");
+            if (userVoiceId) {
+                formData.append("voice_id", userVoiceId);
+            }
 
             const response = await fetch(`${SERVER_URL}/tts/generate`, {
                 method: "POST",

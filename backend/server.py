@@ -101,10 +101,19 @@ async def analyze_audio(
     recorded_path = None
 
     try:
+        logger.info("=== ANALYSIS REQUEST RECEIVED ===")
+        logger.info(f"Truth audio filename: {truth_audio.filename}")
+        logger.info(f"Recorded audio filename: {recorded_audio.filename}")
+        logger.info(f"Truth audio content_type: {truth_audio.content_type}")
+        logger.info(f"Recorded audio content_type: {recorded_audio.content_type}")
+
         # Validate file types
         allowed_extensions = {".wav", ".mp3", ".m4a", ".flac", ".ogg"}
         truth_ext = os.path.splitext(truth_audio.filename)[1].lower()
         recorded_ext = os.path.splitext(recorded_audio.filename)[1].lower()
+
+        logger.info(f"Truth file extension: {truth_ext}")
+        logger.info(f"Recorded file extension: {recorded_ext}")
 
         if (
             truth_ext not in allowed_extensions
@@ -116,23 +125,99 @@ async def analyze_audio(
             )
 
         # Save uploaded files to temporary locations
+        logger.info("=== READING TRUTH AUDIO ===")
+        truth_bytes = await truth_audio.read()
+        logger.info(f"Truth audio bytes read: {len(truth_bytes)} bytes")
+        logger.info(f"Truth audio first 20 bytes: {truth_bytes[:20]}")
+
         with tempfile.NamedTemporaryFile(delete=False, suffix=truth_ext) as truth_tmp:
             truth_path = truth_tmp.name
-            truth_tmp.write(await truth_audio.read())
+            logger.info(f"Writing {len(truth_bytes)} bytes to: {truth_path}")
+            bytes_written = truth_tmp.write(truth_bytes)
+            logger.info(f"Bytes written to truth file: {bytes_written}")
+            truth_tmp.flush()
+            logger.info(f"File flushed to disk")
+
+        logger.info("=== READING RECORDED AUDIO ===")
+        recorded_bytes = await recorded_audio.read()
+        logger.info(f"Recorded audio bytes read: {len(recorded_bytes)} bytes")
+        logger.info(f"Recorded audio first 20 bytes: {recorded_bytes[:20]}")
 
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=recorded_ext
         ) as recorded_tmp:
             recorded_path = recorded_tmp.name
-            recorded_tmp.write(await recorded_audio.read())
+            logger.info(f"Writing {len(recorded_bytes)} bytes to: {recorded_path}")
+            bytes_written = recorded_tmp.write(recorded_bytes)
+            logger.info(f"Bytes written to recorded file: {bytes_written}")
+            recorded_tmp.flush()
+            logger.info(f"File flushed to disk")
+
+        # Verify files exist and have content
+        logger.info("=== VERIFYING FILES ON DISK ===")
+        logger.info(f"Checking if truth file exists: {truth_path}")
+        if not os.path.exists(truth_path):
+            raise Exception(f"Truth file not created: {truth_path}")
+        logger.info(f"✓ Truth file exists")
+
+        logger.info(f"Checking if recorded file exists: {recorded_path}")
+        if not os.path.exists(recorded_path):
+            raise Exception(f"Recorded file not created: {recorded_path}")
+        logger.info(f"✓ Recorded file exists")
+
+        truth_size = os.path.getsize(truth_path)
+        recorded_size = os.path.getsize(recorded_path)
+        logger.info(f"Truth file size on disk: {truth_size} bytes")
+        logger.info(f"Recorded file size on disk: {recorded_size} bytes")
+
+        if truth_size == 0:
+            raise Exception(f"Truth audio file is empty: {truth_path}")
+        if recorded_size == 0:
+            raise Exception(f"Recorded audio file is empty: {recorded_path}")
+
+        # Convert m4a to wav if needed (for better compatibility with librosa)
+        if recorded_ext == ".m4a":
+            logger.info("Converting m4a to wav...")
+            from pydub import AudioSegment
+
+            # Load m4a and convert to wav
+            audio = AudioSegment.from_file(recorded_path, format="m4a")
+            new_recorded_path = recorded_path.replace(".m4a", ".wav")
+            audio.export(new_recorded_path, format="wav")
+
+            # Clean up old m4a file
+            os.unlink(recorded_path)
+            recorded_path = new_recorded_path
+            logger.info(f"Converted to wav: {recorded_path}")
+
+        if truth_ext == ".m4a":
+            logger.info("Converting truth m4a to wav...")
+            from pydub import AudioSegment
+
+            # Load m4a and convert to wav
+            audio = AudioSegment.from_file(truth_path, format="m4a")
+            new_truth_path = truth_path.replace(".m4a", ".wav")
+            audio.export(new_truth_path, format="wav")
+
+            # Clean up old m4a file
+            os.unlink(truth_path)
+            truth_path = new_truth_path
+            logger.info(f"Converted truth to wav: {truth_path}")
 
         # Run analysis
+        logger.info("Starting speech analysis...")
         result = analyze_speech(truth_path, recorded_path)
+        logger.info("=== ANALYSIS SUCCESS ===")
 
         return result
 
     except Exception as e:
-        logger.error(f"Analysis failed: {str(e)}")
+        logger.error("=== ANALYSIS FAILED ===")
+        logger.error(f"Error type: {type(e).__name__}")
+        logger.error(f"Error message: {str(e)}")
+        import traceback
+
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
     finally:
