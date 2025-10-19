@@ -7,13 +7,13 @@ Provides ElevenLabs TTS capabilities including generation, stitching, and voice 
 from elevenlabs.client import ElevenLabs
 from pydub import AudioSegment
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize ElevenLabs client
-client = ElevenLabs(
-    api_key=os.getenv(
-        "ELEVENLABS_API_KEY", "sk_ddccc8ebaa81fead91e8f93921da565e26d3e49fb035f3c6"
-    )
-)
+client = ElevenLabs(api_key=os.getenv("ELEVENLABS_API_KEY"))
 
 
 def tts(

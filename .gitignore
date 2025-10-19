@@ -32,6 +32,27 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
+backend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Audio files (optional - if you don't want to commit generated audio)
+backend/sound_samples/*.mp3
+backend/sound_samples/*.wav
+backend/*.mp3
+backend/*.wav
 
 # typescript
 *.tsbuildinfo
