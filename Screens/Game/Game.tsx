@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-export default function Game() {
-    const navigation = useNavigation();
+const Game = ({navigation}: any) => {
     const route = useRoute();
     const planetNumber = route.params?.planetNumber || 1;
     const [missionCompleted, setMissionCompleted] = useState(false);
@@ -105,6 +104,8 @@ export default function Game() {
         </View>
     );
 }
+
+export default Game;
 
 const styles = StyleSheet.create({
     container: {

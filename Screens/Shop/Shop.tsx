@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function Shop() {
-    const navigation = useNavigation();
     return (
         <View style={styles.container}>
             <Text style={styles.title}>🛒 Shop</Text>
