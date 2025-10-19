@@ -237,7 +237,7 @@ export default function HomePage({ route, navigation }: any) {
                                     y1={item.y + 75}
                                     x2={next.x + 75}
                                     y2={next.y + 75}
-                                    stroke="#60359c"
+                                    stroke="#8B5FBF"
                                     strokeWidth="3"
                                     strokeDasharray="5,5"
                                 />
@@ -382,10 +382,10 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 30,
-        backgroundColor: '#60359c',
+        backgroundColor: '#8B5FBF',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#60359c',
+        shadowColor: '#8B5FBF',
         shadowOffset: {
             width: 0,
             height: 4,

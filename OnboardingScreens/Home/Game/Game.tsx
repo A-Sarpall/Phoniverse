@@ -136,12 +136,12 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#60359c',
+        borderColor: '#8B5FBF',
   },
   missionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#60359c',
+        color: '#8B5FBF',
     marginBottom: 10,
   },
   missionText: {
@@ -155,12 +155,12 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 30,
     borderWidth: 1,
-    borderColor: '#60359c',
+        borderColor: '#8B5FBF',
   },
   rewardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#60359c',
+        color: '#8B5FBF',
     marginBottom: 10,
   },
   rewardText: {
@@ -169,12 +169,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   startButton: {
-    backgroundColor: '#60359c',
+        backgroundColor: '#8B5FBF',
     borderRadius: 15,
     padding: 15,
     alignItems: 'center',
     marginBottom: 15,
-    shadowColor: '#60359c',
+        shadowColor: '#8B5FBF',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -214,10 +214,10 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#60359c',
+        borderColor: '#8B5FBF',
   },
   backButtonText: {
-    color: '#60359c',
+        color: '#8B5FBF',
     fontSize: 16,
     fontWeight: '500',
   },

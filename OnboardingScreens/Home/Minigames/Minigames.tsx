@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#60359c',
+        color: '#8B5FBF',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#60359c',
+        borderColor: '#8B5FBF',
   },
   gameIcon: {
     fontSize: 40,

@@ -23,7 +23,7 @@ const MainTabs = () => {
             screenOptions={{
                 headerShown: false,
                 tabBarStyle: { 
-                    backgroundColor: "#392059",
+                    backgroundColor: "#5A3A7A",
                     borderTopWidth: 0,
                     elevation: 0,
                     shadowOpacity: 0,

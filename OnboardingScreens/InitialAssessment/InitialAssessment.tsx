@@ -46,7 +46,7 @@ const InitialAssessment = ({ navigation }: any) => {
         isLoading,
     } = useInitialAssessment();
 
-    const circleColor = "#2c1743";
+    const circleColor = "#4A2D63";
 
     // Generate and play trainer voice on component mount
     useEffect(() => {

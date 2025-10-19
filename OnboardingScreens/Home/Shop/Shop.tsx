@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 16,
-        color: '#60359c',
+        color: '#8B5FBF',
         textAlign: 'center',
         marginBottom: 20,
     },
@@ -245,13 +245,13 @@ const styles = StyleSheet.create({
     currency: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#60359c',
+        color: '#8B5FBF',
         backgroundColor: 'rgba(96, 53, 156, 0.2)',
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: '#60359c',
+        borderColor: '#8B5FBF',
     },
     gridContainer: {
         paddingHorizontal: 10,
@@ -268,8 +268,8 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#60359c',
-        shadowColor: '#60359c',
+        borderColor: '#8B5FBF',
+        shadowColor: '#8B5FBF',
         shadowOffset: {
             width: 0,
             height: 4,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     },
     itemPrice: {
         fontSize: 12,
-        color: '#60359c',
+        color: '#8B5FBF',
         fontWeight: '600',
         textAlign: 'center',
     },

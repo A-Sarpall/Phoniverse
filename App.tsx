@@ -34,7 +34,7 @@ interface AvatarContextType {
 export const ThemeContext = createContext<Theme>({
     background: "#160b20",
     text: "#fff",
-    button: "#60359c",
+    button: "#8B5FBF",
 });
 
 export const PointsContext = createContext<PointsContextType>({
@@ -84,7 +84,7 @@ export default function App() {
     const theme = {
         background: "#160b20",
         text: "#fff",
-        button: "#60359c",
+        button: "#8B5FBF",
     };
     const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
@@ -125,7 +125,7 @@ export default function App() {
                         <Stack.Navigator
                             initialRouteName={"Welcome"}
                             screenOptions={{
-                                headerStyle: { backgroundColor: "#392059" },
+                                headerStyle: { backgroundColor: "#5A3A7A" },
                                 headerTitleStyle: { color: "#fff" },
                                 headerTintColor: "#fff",
                             }}
