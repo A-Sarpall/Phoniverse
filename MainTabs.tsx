@@ -71,6 +71,13 @@ const MainTabs = () => {
                     tabBarIcon: ({ color }) => (
                         <FontAwesomeIcon icon={faPlay} size={20} color={color} />
                     ),
+                    headerShown: true,
+                    tabBarStyle: {
+                        display: 'none'
+                    },
+                    headerStyle: { backgroundColor: "#392059" },
+                    headerTitleStyle: { color: "#fff" },
+                    headerTintColor: "#fff",
                 }}
             />
         </Tab.Navigator>

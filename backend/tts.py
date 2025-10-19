@@ -110,7 +110,7 @@ def generate_clone(
     Create a voice clone from audio sample.
 
     Args:
-        audio_bytes: Audio data as bytes (generator will be converted)
+        audio_bytes: Audio data as bytes
         name: Name for the cloned voice
         description: Description of the voice
 
@@ -119,24 +119,43 @@ def generate_clone(
     """
     import tempfile
     import os
+    from io import BytesIO
 
-    # Create temp file for the audio
-    temp_file = None
+    temp_path = None
     try:
         # Create temporary file with .mp3 extension
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=".mp3", mode="wb"
+        ) as temp_file:
             temp_file.write(audio_bytes)
             temp_path = temp_file.name
 
-        # Create voice clone using the temp file
-        voice = client.clone(
-            name=name,
-            files=[temp_path],
-            description=description,
-        )
+        # Verify file exists
+        if not os.path.exists(temp_path):
+            raise FileNotFoundError(f"Temp file not found: {temp_path}")
+        
+        with open(temp_path, "rb") as audio_file:
+            voice = client.voices.ivc.create(
+                name=name,
+                files=[audio_file],
+                description=description,
+                remove_background_noise=True,
+            )
 
         return voice
+
+    except Exception as e:
+        print(f"[generate_clone] ERROR: {type(e).__name__}: {str(e)}")
+        import traceback
+
+        print(f"[generate_clone] Traceback:")
+        traceback.print_exc()
+        raise
     finally:
         # Clean up temp file
-        if os.path.exists(temp_path):
-            os.unlink(temp_path)
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.unlink(temp_path)
+                print(f"[generate_clone] Temp file cleaned up: {temp_path}")
+            except Exception as cleanup_error:
+                print(f"[generate_clone] Cleanup error: {cleanup_error}")

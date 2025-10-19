@@ -1,10 +1,15 @@
-import {useContext} from "react";
-import {ThemeContext} from "../../App";
-import {Audio} from "expo-av";
-import {Alert} from "react-native";
+import { useContext, useEffect } from "react";
+import { ThemeContext } from "../../App";
+import { Audio } from "expo-av";
+import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const useWelcome = (navigation: any) => {
     const theme = useContext(ThemeContext);
+
+    useEffect(() => {
+        void handleDone();
+    }, []);
 
     const handleGetStarted = async () => {
         try {
@@ -23,10 +28,20 @@ const useWelcome = (navigation: any) => {
         }
     };
 
+    const handleDone = async () => {
+        try {
+            await AsyncStorage.setItem("hasCompletedOnboarding", "true");
+            navigation.replace("MainTabs");
+        } catch (error) {
+            console.error("Error saving onboarding status:", error);
+        }
+    };
+
     return {
         handleGetStarted,
+        handleDone,
         theme,
-    }
-}
+    };
+};
 
 export default useWelcome;

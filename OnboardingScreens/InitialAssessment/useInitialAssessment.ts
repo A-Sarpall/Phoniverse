@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { Audio } from "expo-av";
 import { Alert } from "react-native";
 import {
     AudioModule,
@@ -15,6 +14,7 @@ const useInitialAssessment = () => {
     const [isRecording, setIsRecording] = useState(false);
     const [isDoneRecording, setIsDoneRecording] = useState(false);
     const [recordingUri, setRecordingUri] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false); // 👈 Added
 
     const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
     const recorderState = useAudioRecorderState(audioRecorder);
@@ -76,6 +76,9 @@ const useInitialAssessment = () => {
         setIsDoneRecording,
         recordingUri,
         recorderState,
+        audioRecorder,
+        isLoading, // 👈 return
+        setIsLoading, // 👈 return
     };
 };
 
