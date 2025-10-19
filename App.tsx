@@ -1,7 +1,7 @@
 import React, { createContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Welcome from "./OnboardingScreens/Welcome/Welcome";
+import UseWelcome from "./OnboardingScreens/Welcome/useWelcome";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import {StatusBar} from "react-native";
 
@@ -30,8 +30,8 @@ export default function App() {
         <ThemeContext.Provider value={theme}>
             <NavigationContainer>
                 <StatusBar barStyle='dark-content' />
-                <Stack.Navigator initialRouteName="Welcome">
-                    <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
+                <Stack.Navigator initialRouteName="UseWelcome">
+                    <Stack.Screen name="Welcome" component={UseWelcome} options={{ headerShown: false }} />
                     <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
                 </Stack.Navigator>
             </NavigationContainer>

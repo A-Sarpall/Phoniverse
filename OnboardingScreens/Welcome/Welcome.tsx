@@ -1,28 +1,10 @@
-import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
-import { Audio } from "expo-av";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { styles } from "./Welcome.style";
-import { ThemeContext } from "../../App";
+import useWelcome from "./useWelcome";
 
 const Welcome = ({ navigation }: any) => {
-    const theme = useContext(ThemeContext);
-
-    const handleGetStarted = async () => {
-        try {
-            const { status } = await Audio.requestPermissionsAsync();
-
-            if (status === "granted") {
-                navigation.navigate("Initial Assessment");
-            } else {
-                Alert.alert(
-                    "Permission Required",
-                    "We need access to your microphone to record short audio clips."
-                );
-            }
-        } catch (error) {
-            console.error("Error requesting permission:", error);
-        }
-    };
+    const {theme, handleGetStarted}  = useWelcome(navigation);
 
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
