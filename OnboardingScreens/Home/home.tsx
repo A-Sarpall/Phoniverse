@@ -252,14 +252,14 @@ export default function HomePage({ route, navigation }: any) {
                     <View key={item.number} style={[styles.imageContainer, { left: item.x, top: item.y }]}>
                         <Image source={item.source} style={styles.image} />
                         <TouchableOpacity
-                            disabled={item.number > currentSpaceshipPosition + 1} // 🚫 lock planets more than one above current
+                            disabled={item.number !== currentSpaceshipPosition} // 🔒 lock everything except current planet
                             style={[
                                 styles.numberLabel,
                                 item.number < currentSpaceshipPosition && styles.completedLabel,
-                                item.number > currentSpaceshipPosition + 1 && styles.lockedLabel, // 🎯 new locked style
+                                item.number !== currentSpaceshipPosition && styles.lockedLabel, // lock all except current
                             ]}
                             onPress={() => {
-                                if (item.number <= currentSpaceshipPosition + 1) {
+                                if (item.number === currentSpaceshipPosition) {
                                     navigation.navigate('Game', { planetNumber: item.number });
                                 }
                             }}
@@ -269,15 +269,16 @@ export default function HomePage({ route, navigation }: any) {
                                 style={[
                                     styles.numberText,
                                     item.number < currentSpaceshipPosition && styles.completedText,
-                                    item.number > currentSpaceshipPosition + 1 && styles.lockedText, // 🔒 gray-out locked planets
+                                    item.number !== currentSpaceshipPosition && styles.lockedText,
                                 ]}
                             >
                                 {item.number < currentSpaceshipPosition
                                     ? '✓'
-                                    : item.number > currentSpaceshipPosition + 1
+                                    : item.number !== currentSpaceshipPosition
                                         ? '🔒'
                                         : item.number}
                             </Text>
+
 
                         </TouchableOpacity>
 
@@ -313,7 +314,7 @@ export default function HomePage({ route, navigation }: any) {
                     </Animated.View>
                 )}
             </ScrollView>
-            
+
             {/* Floating Points Circle */}
             <View style={styles.pointsCircle}>
                 <Text style={styles.pointsText}>{totalPoints}</Text>

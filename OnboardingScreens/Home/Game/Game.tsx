@@ -8,7 +8,7 @@ import {
     Modal,
     ActivityIndicator,
 } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import {useFocusEffect, useRoute} from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio } from "expo-av";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -18,6 +18,7 @@ import { levelSentences } from "../../../sentences/levelSentences";
 import useGame from "./useGame";
 import { stitchMissionAudio, analyzeRecordingWithSSound } from "./Game.service";
 import { SERVER_URL } from "../../../config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Game = ({ navigation }: any) => {
     const route = useRoute();
@@ -118,6 +119,10 @@ const Game = ({ navigation }: any) => {
                 // Analyze the recording
                 const result = await analyzeRecordingWithSSound(uri);
                 setAnalysisResult(result);
+                setMissionCompleted(true);
+                navigation.navigate("MainTabs", {
+                    completedPlanet: planetNumber,
+                });
 
                 console.log("Analysis complete:", result);
             } catch (err) {
@@ -134,7 +139,10 @@ const Game = ({ navigation }: any) => {
 
     const handleGoHome = () => {
         setModalVisible(false);
-        navigation.navigate("Home", { completedPlanet: planetNumber });
+        navigation.replace("MainTabs", {
+            screen: "Home",
+            params: { completedPlanet: planetNumber },
+        });
     };
 
     return (
@@ -264,9 +272,7 @@ const Game = ({ navigation }: any) => {
                                             `Mission completed for Planet ${planetNumber}`
                                         );
                                         setMissionCompleted(true);
-                                        navigation.navigate("Home", {
-                                            completedPlanet: planetNumber,
-                                        });
+                                        handleGoHome()
                                     }}
                                 >
                                     <Text style={styles.finishButtonText}>
