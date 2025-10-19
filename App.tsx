@@ -4,6 +4,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAssessment";
 import {StatusBar} from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
+import HomePage from "./Screens/Home/Home";
+import Minigames from "./Screens/Minigames/Minigames";
+import Avatar from "./Screens/Avatar/Avatar";
+import Shop from "./Screens/Shop/Shop";
+import Game from "./Screens/Game/Game";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,9 +35,21 @@ export default function App() {
         <ThemeContext.Provider value={theme}>
             <NavigationContainer>
                 <StatusBar barStyle='light-content' />
-                <Stack.Navigator initialRouteName="Welcome">
+                <Stack.Navigator initialRouteName="Welcome" screenOptions={{
+                    headerStyle: {
+                        backgroundColor: "#392059",
+                    },
+                    headerTitleStyle: {
+                        color: "#fff",
+                    }
+                }}>
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
+                    <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Minigames" component={Minigames} options={{ headerShown: false }} />
+                    <Stack.Screen name="Avatar" component={Avatar} options={{ headerShown: false }} />
+                    <Stack.Screen name="Shop" component={Shop} options={{ headerShown: false }} />
+                    <Stack.Screen name="Game" component={Game} options={{ headerShown: false }} />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeContext.Provider>
