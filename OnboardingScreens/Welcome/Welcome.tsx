@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { styles } from "./Welcome.style";
 import useWelcome from "./useWelcome";
+import GalaxyBackground from "./GalaxyBackground";
 
 const Welcome = ({ navigation }: any) => {
     const {theme, handleGetStarted}  = useWelcome(navigation);
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={styles.container}>
+            <GalaxyBackground />
             <View style={styles.content}>
                 <Text style={[styles.title, { color: theme.text }]}>
-                    hey, welcome to appName!
+                    Welcome to Phoniverse!!
                 </Text>
                 <Text style={[styles.subtitle, { color: theme.text }]}>
-                    we just need a couple of short audio clips from you to get started.
+                    Overcome your speech impediments with <Text style={{fontWeight: 'bold', fontStyle: 'italic'}}>A</Text>L<Text style={{fontWeight: 'bold', fontStyle: 'italic'}}>I</Text>EN-powered speech therapy.
                 </Text>
             </View>
 
@@ -21,7 +23,7 @@ const Welcome = ({ navigation }: any) => {
                 style={[styles.button, { backgroundColor: theme.button }]}
                 onPress={handleGetStarted}
             >
-                <Text style={styles.buttonText}>get started</Text>
+                <Text style={styles.buttonText}>Get Started</Text>
             </TouchableOpacity>
         </View>
     );

@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { View, Button, Text, StyleSheet } from "react-native";
 
 // API Configuration
-const API_BASE_URL = "http://localhost:8000"; // Change to your server IP/domain
+const API_BASE_URL = "https://fcf604385834.ngrok-free.app"; // Updated to ngrok URL
 
 /**
  * Analyze two audio files for speech differences

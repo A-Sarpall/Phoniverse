@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 10,
         borderWidth: 10,
-        borderColor: "#60359c",
+        borderColor: "#8B5FBF",
     },
     button: {
         paddingVertical: 16,

@@ -41,18 +41,18 @@ python server.py
 
 ### 3. Test the API
 
-Visit: http://localhost:8000/docs (Interactive API documentation)
+Visit: https://fcf604385834.ngrok-free.app/docs (Interactive API documentation)
 
 **Health Check:**
 
 ```bash
-curl http://localhost:8000/health
+curl https://fcf604385834.ngrok-free.app/health
 ```
 
 **Analyze Speech:**
 
 ```bash
-curl -X POST http://localhost:8000/analyze \
+curl -X POST https://fcf604385834.ngrok-free.app/analyze \
   -F "truth=@no_lisp.wav" \
   -F "recorded=@lisp.wav"
 ```
@@ -71,7 +71,7 @@ const API_BASE_URL = "http://YOUR_SERVER_IP:8000";
 
 **For local testing:**
 
--   iOS Simulator: `http://localhost:8000`
+-   iOS Simulator: `https://fcf604385834.ngrok-free.app`
 -   Android Emulator: `http://10.0.2.2:8000`
 -   Physical device: `http://192.168.x.x:8000` (your computer's local IP)
 
