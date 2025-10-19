@@ -1,17 +1,27 @@
-# Speech Analysis API - Requirements
+# Speech Analysis API - Server Requirements
+# Install with: pip install -r requirements-server.txt
 
-# Core dependencies
+# Core API Framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 
-# ML/Audio processing (already installed from your notebook)
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# ML/Audio Processing
 torch>=2.0.0
 torchaudio>=2.0.0
 transformers>=4.30.0
 librosa>=0.10.0
 numpy>=1.24.0
+scipy>=1.10.0
 
-# Optional for production
-# gunicorn==21.2.0  # For production deployment
-# python-dotenv==1.0.0  # For environment variables
+# Audio Manipulation
+pydub>=0.25.1
+
+# TTS (ElevenLabs)
+elevenlabs>=0.2.0
+
+# Production Server (optional, uncomment for deployment)
+# gunicorn==21.2.0 

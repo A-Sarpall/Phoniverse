@@ -211,6 +211,7 @@ async def create_voice_clone(
         # Read audio file
         audio_bytes = await audio_file.read()
 
+        logger.info(f"Received audio file: {audio_file.filename}, size: {len(audio_bytes)} bytes")
         # Create voice clone
         voice = generate_clone(audio_bytes, name=name, description=description)
 

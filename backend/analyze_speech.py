@@ -181,7 +181,8 @@ def analyze_speech(truth_path, recorded_path):
             "interdental": int,
             "palatal": int,
             "lateral": int,
-            "dentalized": int
+            "dentalized": int,
+            "total": int
         }
     """
     processor, model, device = get_model()
@@ -199,7 +200,19 @@ def analyze_speech(truth_path, recorded_path):
     )
 
     # Initialize counts
-    lisp_counts = {"interdental": 0, "palatal": 0, "lateral": 0, "dentalized": 0}
+    lisp_counts = {
+        "interdental": 0,
+        "palatal": 0,
+        "lateral": 0,
+        "dentalized": 0,
+        "total": 0,
+    }
+
+    # Get total /s/ sounds from truth audio (expected count)
+    truth_sibilant_regions = find_sibilant_regions(
+        audio_truth, logits_truth, processor, sr_truth
+    )
+    lisp_counts["total"] = len(truth_sibilant_regions)
 
     # Step 1: Phoneme substitution analysis
     # Detects when /s/ is completely replaced (e.g., s→th, s→sh)

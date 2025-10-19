@@ -2,5 +2,6 @@
   "interdental": 4,
   "palatal": 2,
   "lateral": 0,
-  "dentalized": 0
+  "dentalized": 0,
+  "total": 8
 }

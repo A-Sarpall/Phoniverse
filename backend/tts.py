@@ -118,26 +118,23 @@ def generate_clone(
         Voice object with voice_id attribute
     """
     import tempfile
+    import os
 
-    # Convert generator to bytes if needed
-    if hasattr(audio_bytes, "__iter__") and not isinstance(
-        audio_bytes, (bytes, bytearray)
-    ):
-        audio_bytes = b"".join(audio_bytes)
-
-    # Save to temporary file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
-        temp_file.write(audio_bytes)
-        temp_path = temp_file.name
-
+    # Create temp file for the audio
+    temp_file = None
     try:
-        # Create voice clone
-        voice = client.voices.ivc.create(
+        # Create temporary file with .mp3 extension
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_file:
+            temp_file.write(audio_bytes)
+            temp_path = temp_file.name
+
+        # Create voice clone using the temp file
+        voice = client.clone(
             name=name,
             files=[temp_path],
             description=description,
-            remove_background_noise=True,
         )
+
         return voice
     finally:
         # Clean up temp file
