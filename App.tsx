@@ -45,7 +45,7 @@ export default function App() {
             <NavigationContainer>
                 <StatusBar barStyle="light-content" />
                 <Stack.Navigator
-                    initialRouteName={hasCompletedOnboarding ? 'MainTabs' : 'Welcome'}
+                    initialRouteName={"Welcome"}
                     screenOptions={{
                         headerStyle: { backgroundColor: "#392059" },
                         headerTitleStyle: { color: "#fff" },
