@@ -1,8 +1,101 @@
-import React from 'react';
-import { View, ScrollView, Image, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, ScrollView, Image, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import Svg, { Line, Circle } from 'react-native-svg';
 
-export default function HomePage() {
+export default function HomePage({ route }) {
+  const navigation = useNavigation();
+  const [completedPlanets, setCompletedPlanets] = useState(new Set());
+  const [currentSpaceshipPosition, setCurrentSpaceshipPosition] = useState(1); // Start at planet 1
+  const [isSpaceshipTravelling, setIsSpaceshipTravelling] = useState(false); // Track spaceship animation state
+  
+  // Animation values for smooth spaceship movement
+  const spaceshipOpacity = useRef(new Animated.Value(1)).current;
+  const spaceshipScale = useRef(new Animated.Value(1)).current;
+  const spaceshipX = useRef(new Animated.Value(0)).current;
+  const spaceshipY = useRef(new Animated.Value(0)).current;
+  
+  // Ref for ScrollView to enable auto-scrolling
+  const scrollViewRef = useRef(null);
+  
+  // Update completed planets when returning from Game screen
+  useFocusEffect(
+    React.useCallback(() => {
+      if (route?.params?.completedPlanet) {
+        setCompletedPlanets(prevCompletedPlanets => {
+          const newCompletedPlanets = new Set(prevCompletedPlanets);
+          newCompletedPlanets.add(route.params.completedPlanet);
+          return newCompletedPlanets;
+        });
+        
+        // Update spaceship position to next planet with gliding animation
+        const nextPosition = route.params.completedPlanet + 1;
+        if (nextPosition <= 5) {
+          // Get current and next planet positions
+          const currentPlanetIndex = images.findIndex(img => img.number === route.params.completedPlanet);
+          const nextPlanetIndex = images.findIndex(img => img.number === nextPosition);
+          
+          if (currentPlanetIndex !== -1 && nextPlanetIndex !== -1) {
+            // Calculate positions
+            const screenWidth = 300;
+            const imageSize = 150;
+            const offset = 50;
+            
+            const currentX = currentPlanetIndex % 2 === 0 ? 20 + offset : screenWidth - imageSize - 20 + offset;
+            const currentY = (images.length - 1 - currentPlanetIndex) * 200 + 50;
+            
+            const nextX = nextPlanetIndex % 2 === 0 ? 20 + offset : screenWidth - imageSize - 20 + offset;
+            const nextY = (images.length - 1 - nextPlanetIndex) * 200 + 50;
+            
+            // Start travelling animation
+            setIsSpaceshipTravelling(true);
+            
+            // Set initial position
+            spaceshipX.setValue(currentX + 140); // Add spaceship offset (adjusted for smaller spaceship)
+            spaceshipY.setValue(currentY + 45);
+            
+            // Add listener to spaceshipY to follow spaceship during animation
+            const animationListener = spaceshipY.addListener(({ value }) => {
+              if (scrollViewRef.current) {
+                // Calculate scroll position to keep spaceship centered in view
+                const scrollY = value - 200; // Center spaceship in viewport
+                scrollViewRef.current.scrollTo({
+                  y: Math.max(0, scrollY),
+                  animated: false // No animation here, we want real-time following
+                });
+              }
+            });
+
+            // Animate to next position
+            Animated.parallel([
+              Animated.timing(spaceshipX, {
+                toValue: nextX + 140,
+                duration: 1500, // 1.5 second glide
+                useNativeDriver: true,
+              }),
+              Animated.timing(spaceshipY, {
+                toValue: nextY + 45,
+                duration: 1500,
+                useNativeDriver: true,
+              }),
+            ]).start(() => {
+              // Remove the animation listener
+              spaceshipY.removeListener(animationListener);
+              
+              // Animation complete - update position and switch to normal spaceship
+              setCurrentSpaceshipPosition(nextPosition);
+              setIsSpaceshipTravelling(false);
+              
+              // Reset position for normal display
+              spaceshipX.setValue(0);
+              spaceshipY.setValue(0);
+            });
+          }
+        }
+      }
+    }, [route?.params?.completedPlanet])
+  );
+  
   const images = [
     { source: require('../../assets/planet1.png'), number: 1 },
     { source: require('../../assets/asteroid1.png'), number: 2 },
@@ -11,15 +104,15 @@ export default function HomePage() {
     { source: require('../../assets/planet3.png'), number: 5 },
   ];
 
-  // Generate random star positions for the starfield background
-  const generateStars = () => {
-    const stars = [];
+  // Generate random star positions for the starfield background (memoized to keep stars consistent)
+  const stars = useMemo(() => {
+    const starArray = [];
     const starCount = 80; // Number of stars
     const containerWidth = 400;
     const containerHeight = 1200;
     
     for (let i = 0; i < starCount; i++) {
-      stars.push({
+      starArray.push({
         id: i,
         x: Math.random() * containerWidth,
         y: Math.random() * containerHeight,
@@ -27,10 +120,8 @@ export default function HomePage() {
         opacity: Math.random() * 0.8 + 0.2, // Random opacity between 0.2 and 1
       });
     }
-    return stars;
-  };
-
-  const stars = generateStars();
+    return starArray;
+  }, []); // Empty dependency array means this only runs once
 
   // Calculate positions for zigzag layout (reversed - start from bottom)
   const imagePositions = images.map((item, index) => {
@@ -49,13 +140,14 @@ export default function HomePage() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={true}
-        ref={(ref) => {
-          if (ref) {
-            // Scroll to bottom on mount to start from image 5
-            setTimeout(() => {
-              ref.scrollToEnd({ animated: false });
-            }, 100);
-          }
+        ref={scrollViewRef}
+        onLayout={() => {
+          // Scroll to bottom on mount to start from image 5
+          setTimeout(() => {
+            if (scrollViewRef.current) {
+              scrollViewRef.current.scrollToEnd({ animated: false });
+            }
+          }, 100);
         }}
       >
         <Svg style={styles.svgOverlay}>
@@ -106,24 +198,76 @@ export default function HomePage() {
             ]}
           >
             <Image source={item.source} style={styles.image} />
-            <Text style={styles.numberLabel}>{item.number}</Text>
+            <TouchableOpacity 
+              style={[
+                styles.numberLabel,
+                completedPlanets.has(item.number) && styles.completedLabel
+              ]}
+              onPress={() => navigation.navigate('Game', { planetNumber: item.number })}
+            >
+              <Text style={[
+                styles.numberText,
+                completedPlanets.has(item.number) && styles.completedText
+              ]}>
+                {completedPlanets.has(item.number) ? '✓' : item.number}
+              </Text>
+            </TouchableOpacity>
+            
+            {/* Add spaceship next to current position planet (static) */}
+            {item.number === currentSpaceshipPosition && !isSpaceshipTravelling && (
+              <View style={styles.spaceshipContainer}>
+                <Image 
+                  source={require('../../assets/spaceship.png')} 
+                  style={styles.spaceship}
+                />
+              </View>
+            )}
           </View>
         ))}
+        
+        {/* Animated travelling spaceship */}
+        {isSpaceshipTravelling && (
+          <Animated.View
+            style={[
+              styles.travellingSpaceshipContainer,
+              {
+                transform: [
+                  { translateX: spaceshipX },
+                  { translateY: spaceshipY }
+                ],
+              }
+            ]}
+          >
+            <Image 
+              source={require('../../assets/travellingSpaceship.png')} 
+              style={styles.spaceship}
+            />
+          </Animated.View>
+        )}
       </ScrollView>
       
       {/* Bottom Navigation Bar */}
       <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Minigames')}
+        >
           <Text style={styles.navIcon}>🎮</Text>
           <Text style={styles.navLabel}>Minigames</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Avatar')}
+        >
           <Text style={styles.navIcon}>👤</Text>
           <Text style={styles.navLabel}>Avatar</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity 
+          style={styles.navItem}
+          onPress={() => navigation.navigate('Shop')}
+        >
           <Text style={styles.navIcon}>🛒</Text>
           <Text style={styles.navLabel}>Shop</Text>
         </TouchableOpacity>
@@ -165,18 +309,31 @@ const styles = StyleSheet.create({
     height: 150,
     resizeMode: 'contain',
   },
+  spaceshipContainer: {
+    position: 'absolute',
+    left: 140, // Position to the right of the planet (adjusted for smaller spaceship)
+    top: 45, // Center vertically with the planet (adjusted for smaller spaceship)
+    zIndex: 3,
+  },
+  travellingSpaceshipContainer: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    zIndex: 4, // Above everything else
+  },
+  spaceship: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+  },
   numberLabel: {
     position: 'absolute',
     top: 60,
     left: 60,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    color: '#000',
-    fontSize: 20,
-    fontWeight: 'bold',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 15,
-    textAlign: 'center',
     minWidth: 30,
     shadowColor: '#000',
     shadowOffset: {
@@ -186,6 +343,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  numberText: {
+    color: '#000',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  completedLabel: {
+    backgroundColor: '#28a745',
+  },
+  completedText: {
+    color: '#fff',
+    fontSize: 24,
   },
   navbar: {
     position: 'absolute',

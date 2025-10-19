@@ -5,6 +5,10 @@ import InitialAssessment from "./OnboardingScreens/InitialAssessment/InitialAsse
 import {StatusBar} from "react-native";
 import Welcome from "./OnboardingScreens/Welcome/Welcome";
 import HomePage from "./OnboardingScreens/Home/home";
+import Minigames from "./OnboardingScreens/Home/Minigames/Minigames";
+import Avatar from "./OnboardingScreens/Home/Avatar/Avatar";
+import Shop from "./OnboardingScreens/Home/Shop/Shop";
+import Game from "./OnboardingScreens/Home/Game/Game";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,6 +39,10 @@ export default function App() {
                     <Stack.Screen name="Welcome" component={Welcome} options={{ headerShown: false }} />
                     <Stack.Screen name="Initial Assessment" component={InitialAssessment} options={{ headerShown: true }} />
                     <Stack.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
+                    <Stack.Screen name="Minigames" component={Minigames} options={{ headerShown: false }} />
+                    <Stack.Screen name="Avatar" component={Avatar} options={{ headerShown: false }} />
+                    <Stack.Screen name="Shop" component={Shop} options={{ headerShown: false }} />
+                    <Stack.Screen name="Game" component={Game} options={{ headerShown: false }} />
                 </Stack.Navigator>
             </NavigationContainer>
         </ThemeContext.Provider>
