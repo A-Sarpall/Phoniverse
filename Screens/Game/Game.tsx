@@ -1,162 +1,249 @@
-import React, {useLayoutEffect, useState} from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import React, {useContext, useLayoutEffect, useState} from "react";
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    Image,
+    Modal,
+} from "react-native";
+import { useRoute } from "@react-navigation/native";
+import useInitialAssessment from "../../OnboardingScreens/InitialAssessment/useInitialAssessment";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemeContext } from "../../App";
+import { levelSentences } from "../../sentences/levelSentences";
 
-const Game = ({navigation}: any) => {
+const Game = ({ navigation }: any) => {
     const route = useRoute();
     const planetNumber = route.params?.planetNumber || 1;
-    const [missionCompleted, setMissionCompleted] = useState(false);
+    const [prompt] = useState("Say this phrase clearly to complete your mission:");
+    const [modalVisible, setModalVisible] = useState(false);
+    const [score, setScore] = useState<number | null>(null);
+    const theme = useContext(ThemeContext);
+
+    const {
+        isRecording,
+        isDoneRecording,
+        record,
+        stopRecording,
+        resetRecording,
+        isLoading,
+    } = useInitialAssessment();
 
     useLayoutEffect(() => {
         navigation.setOptions({ title: `Planet ${planetNumber}` });
     }, [navigation, planetNumber]);
 
-    return (
-        <View style={styles.container}>
-            {!missionCompleted ? (
-                <TouchableOpacity
-                    style={styles.startButton}
-                    onPress={() => {
-                        console.log(`Starting mission for Planet ${planetNumber}`);
-                        setMissionCompleted(true);
-                    }}
-                >
-                    <Text style={styles.startButtonText}>🚀 Start Mission</Text>
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity
-                    style={styles.finishButton}
-                    onPress={() => {
-                        console.log(`Mission completed for Planet ${planetNumber}`);
-                        navigation.navigate('Home', { completedPlanet: planetNumber });
-                    }}
-                >
-                    <Text style={styles.finishButtonText}>✅ Finish Mission</Text>
-                </TouchableOpacity>
-            )}
+    const handleRecordPress = async () => {
+        if (isRecording) {
+            const uri = await stopRecording();
+            console.log("Recording saved:", uri);
 
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => navigation.goBack()}
+            // For demo — generate random score
+            const randomScore = Math.floor(Math.random() * 100);
+            setScore(randomScore);
+            setModalVisible(true);
+        } else if (isDoneRecording) {
+            console.log("Mission complete for Planet", planetNumber);
+            navigation.navigate("Home", { completedPlanet: planetNumber });
+        } else {
+            await record();
+        }
+    };
+
+    const handleGoHome = () => {
+        setModalVisible(false);
+        navigation.navigate("Home", { completedPlanet: planetNumber });
+    };
+
+    return (
+        <SafeAreaView
+            style={[styles.container, { backgroundColor: theme.background }]}
+        >
+            <View style={styles.characterContainer}>
+                {/* Alien image */}
+                <Image
+                    source={require("../../HackTX Drawings/TrainingAlien.png")}
+                    style={styles.alienImage}
+                />
+
+                {/* Chatbox overlay */}
+                <View style={styles.chatboxContainer}>
+                    <Image
+                        source={require("../../HackTX Drawings/Chatbox Background Removed.png")}
+                        style={styles.chatboxImage}
+                    />
+                    <Text style={styles.chatText}>{levelSentences[0]}</Text>
+                </View>
+            </View>
+
+            <View style={styles.bottomContainer}>
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        { backgroundColor: isLoading ? "#999" : theme.button },
+                    ]}
+                    disabled={isLoading}
+                    onPress={handleRecordPress}
+                >
+                    <Text style={styles.buttonText}>
+                        {isLoading
+                            ? "Loading..."
+                            : isRecording
+                                ? "Finish Recording"
+                                : isDoneRecording
+                                    ? "Done"
+                                    : "Record"}
+                    </Text>
+                </TouchableOpacity>
+
+                {isDoneRecording && (
+                    <TouchableOpacity
+                        style={[
+                            styles.button,
+                            { backgroundColor: "transparent", marginTop: 12 },
+                        ]}
+                        onPress={() => {
+                            resetRecording();
+                            void record();
+                        }}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.buttonText}>Retake</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            {/* ✅ Score Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
             >
-                <Text style={styles.backButtonText}>← Back to Map</Text>
-            </TouchableOpacity>
-        </View>
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContainer}>
+                        <Text style={styles.modalTitle}>Mission Complete!</Text>
+                        <Text style={styles.modalScoreText}>
+                            Your Score:{" "}
+                            <Text style={styles.modalScore}>
+                                {score !== null ? `${score}%` : "--"}
+                            </Text>
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[styles.button, { backgroundColor: "#60359c", width: "80%" }]}
+                            onPress={handleGoHome}
+                        >
+                            <Text style={styles.buttonText}>Go Back Home</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        </SafeAreaView>
     );
-}
+};
 
 export default Game;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#000',
-        padding: 20,
-        paddingTop: 60,
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 20,
     },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#fff',
-        textAlign: 'center',
-        marginBottom: 20,
+    bottomContainer: {
+        width: "100%",
+        alignItems: "center",
     },
-    description: {
-        fontSize: 16,
-        color: '#ccc',
-        textAlign: 'center',
-        marginBottom: 30,
-        lineHeight: 24,
-    },
-    missionCard: {
-        backgroundColor: 'rgba(96, 53, 156, 0.2)',
-        borderRadius: 15,
-        padding: 20,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#60359c',
-    },
-    missionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#60359c',
-        marginBottom: 10,
-    },
-    missionText: {
-        fontSize: 16,
-        color: '#fff',
-        lineHeight: 22,
-    },
-    rewardCard: {
-        backgroundColor: 'rgba(96, 53, 156, 0.2)',
-        borderRadius: 15,
-        padding: 20,
-        marginBottom: 30,
-        borderWidth: 1,
-        borderColor: '#60359c',
-    },
-    rewardTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#60359c',
-        marginBottom: 10,
-    },
-    rewardText: {
-        fontSize: 16,
-        color: '#fff',
-        lineHeight: 22,
-    },
-    startButton: {
-        backgroundColor: '#60359c',
-        borderRadius: 15,
-        padding: 15,
-        alignItems: 'center',
-        marginBottom: 15,
-        shadowColor: '#60359c',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.3,
+    button: {
+        paddingVertical: 16,
+        paddingHorizontal: 32,
+        borderRadius: 12,
+        width: "90%",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOpacity: 0.4,
+        shadowOffset: { width: 0, height: 3 },
         shadowRadius: 4,
         elevation: 5,
+        marginBottom: 20,
     },
-    startButtonText: {
-        color: '#fff',
+    buttonText: {
+        color: "#fff",
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: "600",
     },
-    finishButton: {
-        backgroundColor: '#28a745',
-        borderRadius: 15,
-        padding: 15,
-        alignItems: 'center',
-        marginBottom: 15,
-        shadowColor: '#28a745',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
+    characterContainer: {
+        position: "relative",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 20,
+        width: "100%",
+        height: "55%",
     },
-    finishButtonText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
+    alienImage: {
+        width: "80%",
+        height: "100%",
+        resizeMode: "contain",
     },
-    backButton: {
-        backgroundColor: 'transparent',
-        borderRadius: 15,
-        padding: 15,
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#60359c',
+    chatboxContainer: {
+        position: "absolute",
+        top: -60,
+        right: -20,
+        width: "90%",
+        aspectRatio: 2,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: 12,
     },
-    backButtonText: {
-        color: '#60359c',
+    chatboxImage: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "contain",
+        position: "absolute",
+    },
+    chatText: {
+        color: "#000",
         fontSize: 16,
-        fontWeight: '500',
+        fontWeight: "500",
+        textAlign: "center",
+        paddingHorizontal: 16,
+        lineHeight: 22,
+        marginBottom: 20,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        width: "85%",
+        backgroundColor: "#fff",
+        borderRadius: 20,
+        padding: 30,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOpacity: 0.3,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 10,
+        elevation: 10,
+    },
+    modalTitle: {
+        fontSize: 26,
+        fontWeight: "700",
+        color: "#60359c",
+        marginBottom: 16,
+    },
+    modalScoreText: {
+        fontSize: 20,
+        marginBottom: 24,
+        color: "#333",
+    },
+    modalScore: {
+        fontWeight: "bold",
+        color: "#60359c",
     },
 });

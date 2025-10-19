@@ -9,6 +9,7 @@ const useWelcome = (navigation: any) => {
 
     useEffect(() => {
         void handleDone();
+        // AsyncStorage.clear();
     }, []);
 
     const handleGetStarted = async () => {

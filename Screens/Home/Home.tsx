@@ -1,12 +1,15 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useContext } from 'react';
 import { View, ScrollView, Image, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import Svg, { Line, Circle } from 'react-native-svg';
+import { PointsContext } from '../../App';
 
-export default function HomePage({ route, navigation }) {
+export default function HomePage({ route, navigation }: any) {
     const [completedPlanets, setCompletedPlanets] = useState(new Set());
     const [currentSpaceshipPosition, setCurrentSpaceshipPosition] = useState(1);
     const [isSpaceshipTravelling, setIsSpaceshipTravelling] = useState(false);
+    const [processedPlanets, setProcessedPlanets] = useState(new Set()); // Track which planets we've already processed
+    const { totalPoints, addPoints } = useContext(PointsContext);
 
     const spaceshipX = useRef(new Animated.Value(0)).current;
     const spaceshipY = useRef(new Animated.Value(0)).current;
@@ -15,7 +18,7 @@ export default function HomePage({ route, navigation }) {
 
     const starBrightness = useRef(new Animated.Value(0.5)).current; // ⭐ base brightness (0.5 = normal)
 
-    const scrollViewRef = useRef(null);
+    const scrollViewRef = useRef<ScrollView>(null);
 
     const images = [
         { source: require('../../assets/planet1.png'), number: 1 },
@@ -53,12 +56,23 @@ export default function HomePage({ route, navigation }) {
 
     useFocusEffect(
         React.useCallback(() => {
-            if (route?.params?.completedPlanet) {
+            if (route?.params?.completedPlanet && !processedPlanets.has(route.params.completedPlanet)) {
+                // Mark this planet as processed to prevent duplicate processing
+                setProcessedPlanets(prev => {
+                    const updated = new Set(prev);
+                    updated.add(route.params.completedPlanet);
+                    return updated;
+                });
+
                 setCompletedPlanets(prev => {
                     const updated = new Set(prev);
                     updated.add(route.params.completedPlanet);
                     return updated;
                 });
+
+                // Add points: 30 * level number
+                const pointsEarned = 30 * route.params.completedPlanet;
+                addPoints(pointsEarned);
 
                 const nextPosition = route.params.completedPlanet + 1;
                 if (nextPosition <= 5) {
@@ -176,7 +190,7 @@ export default function HomePage({ route, navigation }) {
                     }
                 }
             }
-        }, [route?.params?.completedPlanet])
+        }, [route?.params?.completedPlanet, processedPlanets, addPoints])
     );
 
     const starScale = starIntensity.interpolate({
@@ -238,33 +252,34 @@ export default function HomePage({ route, navigation }) {
                     <View key={item.number} style={[styles.imageContainer, { left: item.x, top: item.y }]}>
                         <Image source={item.source} style={styles.image} />
                         <TouchableOpacity
-                            disabled={item.number > currentSpaceshipPosition} // 🚫 lock all planets ahead
+                            disabled={item.number > currentSpaceshipPosition + 1} // 🚫 lock planets more than one above current
                             style={[
                                 styles.numberLabel,
                                 item.number < currentSpaceshipPosition && styles.completedLabel,
-                                item.number > currentSpaceshipPosition && styles.lockedLabel,
+                                item.number > currentSpaceshipPosition + 1 && styles.lockedLabel, // 🎯 new locked style
                             ]}
                             onPress={() => {
-                                if (item.number <= currentSpaceshipPosition) {
+                                if (item.number <= currentSpaceshipPosition + 1) {
                                     navigation.navigate('Game', { planetNumber: item.number });
                                 }
                             }}
                         >
+
                             <Text
                                 style={[
                                     styles.numberText,
                                     item.number < currentSpaceshipPosition && styles.completedText,
-                                    item.number > currentSpaceshipPosition && styles.lockedText,
+                                    item.number > currentSpaceshipPosition + 1 && styles.lockedText, // 🔒 gray-out locked planets
                                 ]}
                             >
                                 {item.number < currentSpaceshipPosition
                                     ? '✓'
-                                    : item.number > currentSpaceshipPosition
+                                    : item.number > currentSpaceshipPosition + 1
                                         ? '🔒'
                                         : item.number}
                             </Text>
-                        </TouchableOpacity>
 
+                        </TouchableOpacity>
 
                         {item.number === currentSpaceshipPosition && !isSpaceshipTravelling && (
                             <View style={[styles.spaceshipContainer, { top: -30, left: 45 }]}>
@@ -298,6 +313,38 @@ export default function HomePage({ route, navigation }) {
                     </Animated.View>
                 )}
             </ScrollView>
+
+            {/* Floating Points Circle */}
+            <View style={styles.pointsCircle}>
+                <Text style={styles.pointsText}>{totalPoints}</Text>
+            </View>
+
+            {/* Bottom Navigation Bar */}
+            <View style={styles.navbar}>
+                <TouchableOpacity
+                    style={[styles.navItem, styles.activeNavItem]}
+                    onPress={() => navigation.navigate('Home')}
+                >
+                    <Text style={styles.navIcon}>🏠</Text>
+                    <Text style={styles.navLabel}>Home</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.navItem}
+                    onPress={() => navigation.navigate('Avatar')}
+                >
+                    <Text style={styles.navIcon}>👤</Text>
+                    <Text style={styles.navLabel}>Avatar</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.navItem}
+                    onPress={() => navigation.navigate('Shop')}
+                >
+                    <Text style={styles.navIcon}>🛒</Text>
+                    <Text style={styles.navLabel}>Shop</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -353,6 +400,73 @@ const styles = StyleSheet.create({
     lockedText: {
         color: '#aaa',
         fontSize: 20,
+    },
+    pointsCircle: {
+        position: 'absolute',
+        bottom: 100, // Above the tab bar
+        right: 20,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#60359c',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#60359c',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+        zIndex: 10,
+    },
+    pointsText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    navbar: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 80,
+        backgroundColor: 'rgba(22, 11, 32, 0.95)',
+        borderTopWidth: 1,
+        borderTopColor: '#60359c',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        paddingBottom: 20,
+        paddingTop: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: -2,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 8,
+        zIndex: 10,
+    },
+    navItem: {
+        alignItems: 'center',
+        flex: 1,
+        paddingVertical: 5,
+    },
+    activeNavItem: {
+        backgroundColor: 'rgba(96, 53, 156, 0.3)',
+        borderRadius: 10,
+    },
+    navIcon: {
+        fontSize: 24,
+        marginBottom: 4,
+    },
+    navLabel: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '500',
     },
 
 });

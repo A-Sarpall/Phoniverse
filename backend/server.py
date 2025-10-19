@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Form
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form, Body
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 import tempfile
@@ -48,6 +48,38 @@ async def root():
 async def health():
     """Health check endpoint"""
     return {"status": "healthy"}
+
+
+@app.get("/audio/{filename}")
+async def serve_audio_file(filename: str):
+    """
+    Serve audio files from the sound_samples folder.
+
+    - **filename**: Name of the audio file (e.g., test_phrase.mp3)
+    """
+    try:
+        sound_samples_dir = os.path.join(os.path.dirname(__file__), "sound_samples")
+        file_path = os.path.join(sound_samples_dir, filename)
+        logger.info(f"Serving audio file: {file_path}")
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail=f"File not found: {filename}")
+
+        # Read file
+        with open(file_path, "rb") as f:
+            audio_bytes = f.read()
+
+        return Response(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"Content-Disposition": f"inline; filename={filename}"},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to serve audio file: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to serve audio file: {str(e)}"
+        )
 
 
 @app.post("/analyze")
@@ -159,25 +191,25 @@ async def stitch_audio_files(
 
     Returns combined MP3 audio file.
     """
-    temp_paths = []
-
     try:
-        # Save uploaded files temporarily
-        for audio_file in audio_files:
-            ext = os.path.splitext(audio_file.filename)[1].lower()
-            with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_file:
-                temp_file.write(await audio_file.read())
-                temp_paths.append(temp_file.name)
+        logger.info(f"Received {len(audio_files)} audio files to stitch")
 
-        # Stitch audios
-        stitched = stitch_audios(temp_paths, pause_duration=pause_duration)
+        # Read all audio files as bytes
+        audio_bytes_list = []
+        for i, audio_file in enumerate(audio_files):
+            logger.info(
+                f"File {i}: {audio_file.filename}, content_type: {audio_file.content_type}"
+            )
+            audio_bytes = await audio_file.read()
+            logger.info(f"File {i} size: {len(audio_bytes)} bytes")
+            audio_bytes_list.append(audio_bytes)
 
-        # Export to bytes
-        import io
+        # Stitch audios using bytes directly (no temp files needed!)
+        audio_bytes = stitch_audio_bytes(
+            audio_bytes_list, pause_duration=pause_duration
+        )
 
-        output_io = io.BytesIO()
-        stitched.export(output_io, format="mp3")
-        audio_bytes = output_io.getvalue()
+        logger.info(f"Stitched audio size: {len(audio_bytes)} bytes")
 
         return Response(
             content=audio_bytes,
@@ -186,12 +218,10 @@ async def stitch_audio_files(
         )
     except Exception as e:
         logger.error(f"Audio stitching failed: {str(e)}")
+        import traceback
+
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Audio stitching failed: {str(e)}")
-    finally:
-        # Clean up temp files
-        for path in temp_paths:
-            if os.path.exists(path):
-                os.unlink(path)
 
 
 @app.post("/tts/clone")
@@ -211,7 +241,9 @@ async def create_voice_clone(
         # Read audio file
         audio_bytes = await audio_file.read()
 
-        logger.info(f"Received audio file: {audio_file.filename}, size: {len(audio_bytes)} bytes")
+        logger.info(
+            f"Received audio file: {audio_file.filename}, size: {len(audio_bytes)} bytes"
+        )
         # Create voice clone
         voice = generate_clone(audio_bytes, name=name, description=description)
 
