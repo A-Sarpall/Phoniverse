@@ -139,7 +139,7 @@ def generate_clone(
                 name=name,
                 files=[audio_file],
                 description=description,
-                remove_background_noise=True,
+                remove_background_noise=False,  # Disabled to allow shorter recordings (min 4.6s required when enabled)
             )
 
         return voice

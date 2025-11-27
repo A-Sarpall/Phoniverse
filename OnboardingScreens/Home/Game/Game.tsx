@@ -11,8 +11,9 @@ import {
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system/legacy";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import { faMicrophone, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { ThemeContext } from "../../../App";
 import { levelSentences } from "../../../sentences/levelSentences";
 import useGame from "./useGame";
@@ -88,13 +89,36 @@ const Game = ({ navigation }: any) => {
 
             const reader = new FileReader();
             reader.onloadend = async () => {
-                const base64Audio = reader.result as string;
-                const sound = new Audio.Sound();
-
-                await sound.loadAsync({ uri: base64Audio });
-                await sound.playAsync();
-
-                console.log("Mission audio played successfully");
+                try {
+                    const result = reader.result as string;
+                    const base64Audio = result.includes(",")
+                        ? result.split(",")[1]
+                        : result;
+                    
+                    const audioFileUri = `${FileSystem.cacheDirectory}mission_audio_temp.mp3`;
+                    await FileSystem.writeAsStringAsync(audioFileUri, base64Audio, {
+                        encoding: "base64" as any,
+                    });
+                    
+                    const sound = new Audio.Sound();
+                    await sound.loadAsync({ uri: audioFileUri });
+                    await sound.setVolumeAsync(2.0); // 200% volume
+                    await sound.playAsync();
+                    
+                    sound.setOnPlaybackStatusUpdate((status) => {
+                        if (status.isLoaded && status.didJustFinish) {
+                            sound.unloadAsync();
+                            FileSystem.deleteAsync(audioFileUri, { idempotent: true });
+                        }
+                    });
+                    
+                    console.log("Mission audio played successfully");
+                } catch (error) {
+                    console.error("Error playing mission audio:", error);
+                }
+            };
+            reader.onerror = (error) => {
+                console.error("FileReader error:", error);
             };
             reader.readAsDataURL(audioBlob);
 
@@ -141,10 +165,34 @@ const Game = ({ navigation }: any) => {
                     const analyzingBlob = await analyzingResponse.blob();
                     const reader = new FileReader();
                     reader.onloadend = async () => {
-                        const base64Audio = reader.result as string;
-                        const sound = new Audio.Sound();
-                        await sound.loadAsync({ uri: base64Audio });
-                        await sound.playAsync();
+                        try {
+                            const result = reader.result as string;
+                            const base64Audio = result.includes(",")
+                                ? result.split(",")[1]
+                                : result;
+                            
+                            const audioFileUri = `${FileSystem.cacheDirectory}analyzing_audio_temp.mp3`;
+                            await FileSystem.writeAsStringAsync(audioFileUri, base64Audio, {
+                                encoding: "base64" as any,
+                            });
+                            
+                            const sound = new Audio.Sound();
+                            await sound.loadAsync({ uri: audioFileUri });
+                            await sound.setVolumeAsync(2.0); // 200% volume
+                            await sound.playAsync();
+                            
+                            sound.setOnPlaybackStatusUpdate((status) => {
+                                if (status.isLoaded && status.didJustFinish) {
+                                    sound.unloadAsync();
+                                    FileSystem.deleteAsync(audioFileUri, { idempotent: true });
+                                }
+                            });
+                        } catch (error) {
+                            console.error("Error playing analyzing audio:", error);
+                        }
+                    };
+                    reader.onerror = (error) => {
+                        console.error("FileReader error:", error);
                     };
                     reader.readAsDataURL(analyzingBlob);
                 }
@@ -155,6 +203,18 @@ const Game = ({ navigation }: any) => {
                 setMissionCompleted(true);
 
                 console.log("Analysis complete:", result);
+                
+                // Auto-navigate to Home after a short delay to show results
+                setTimeout(() => {
+                    console.log(`✅ Mission completed for Planet ${planetNumber}, navigating home`);
+                    navigation.navigate("MainTabs", {
+                        screen: "Home",
+                        params: {
+                            completedPlanet: planetNumber,
+                            timestamp: Date.now(), // Force params update
+                        },
+                    });
+                }, 2000); // 2 second delay to show results
             } catch (err) {
                 console.error("Error analyzing recording:", err);
                 alert("Failed to analyze recording. Please try again.");
@@ -188,6 +248,14 @@ const Game = ({ navigation }: any) => {
         <SafeAreaView
             style={[styles.container, { backgroundColor: theme.background }]}
         >
+            {/* Back Button */}
+            <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => navigation.navigate("MainTabs", { screen: "Home" })}
+            >
+                <FontAwesomeIcon icon={faArrowLeft} size={24} color="#fff" />
+            </TouchableOpacity>
+
             <View style={styles.characterContainer}>
                 <Image
                     source={require("../../../assets/trainer.png")}
@@ -199,7 +267,14 @@ const Game = ({ navigation }: any) => {
                         source={require("../../../assets/HackTX Drawings/chatbox.png")}
                         style={styles.chatboxImage}
                     />
-                    <Text style={styles.chatText}>{levelSentences[0]}</Text>
+                    <Text 
+                        style={styles.chatText}
+                        adjustsFontSizeToFit
+                        numberOfLines={3}
+                        minimumFontScale={0.7}
+                    >
+                        {levelSentences[planetNumber - 1] || levelSentences[0]}
+                    </Text>
                 </View>
             </View>
 
@@ -369,6 +444,23 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         paddingVertical: 20,
     },
+    backButton: {
+        position: "absolute",
+        top: 50,
+        left: 20,
+        zIndex: 1000,
+        backgroundColor: "rgba(96, 53, 156, 0.8)",
+        borderRadius: 25,
+        width: 50,
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
+    },
     bottomContainer: {
         width: "100%",
         alignItems: "center",
@@ -406,13 +498,14 @@ const styles = StyleSheet.create({
     },
     chatboxContainer: {
         position: "absolute",
-        top: -60,
-        right: -20,
-        width: "90%",
+        top: "20%", // Moved down a bit
+        right: 10, // Moved to the right (positive value)
+        width: "75%",
         aspectRatio: 2,
         alignItems: "center",
         justifyContent: "center",
         paddingHorizontal: 12,
+        paddingVertical: 8,
     },
     chatboxImage: {
         width: "100%",
@@ -422,12 +515,13 @@ const styles = StyleSheet.create({
     },
     chatText: {
         color: "#000",
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: "500",
         textAlign: "center",
-        paddingHorizontal: 16,
-        lineHeight: 22,
-        marginBottom: 20,
+        paddingHorizontal: 12,
+        lineHeight: 18,
+        flexWrap: "wrap",
+        maxWidth: "100%",
     },
     modalOverlay: {
         flex: 1,

@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "expo start --clear",
+    "start:fast": "expo start --clear --no-dev --minify",
+    "android": "expo start --android --clear",
+    "ios": "expo start --ios --clear",
+    "web": "expo start --web",
+    "clear": "rm -rf .expo node_modules/.cache .metro-health-check*"
   },
   "dependencies": {
     "@elevenlabs/elevenlabs-js": "^2.19.0",

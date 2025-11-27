@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system/legacy";
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
@@ -62,26 +63,58 @@ const InitialAssessment = ({ navigation }: any) => {
                         stringsToPronounce[0]
                 );
 
-                // Convert blob to base64 and play
+                // Convert blob to base64 and save to file
                 const reader = new FileReader();
                 reader.onloadend = async () => {
-                    const base64Audio = reader.result as string;
-                    const sound = new Audio.Sound();
+                    try {
+                        const result = reader.result as string;
+                        
+                        // Extract base64 data (after the comma in data URI)
+                        const base64Audio = result.includes(",")
+                            ? result.split(",")[1]
+                            : result;
 
-                    await sound.loadAsync({ uri: base64Audio });
+                        // Save to a local file
+                        const audioFileUri = `${FileSystem.cacheDirectory}trainer_voice_temp.mp3`;
+                        await FileSystem.writeAsStringAsync(audioFileUri, base64Audio, {
+                            encoding: "base64" as any,
+                        });
 
-                    // Set volume to maximum (1.0 = 100%, 0.0 = 0%)
-                    await sound.setVolumeAsync(1.0);
+                        // Load and play the audio file
+                        const sound = new Audio.Sound();
+                        await sound.loadAsync({ uri: audioFileUri });
 
-                    await sound.playAsync();
+                        // Set volume to 200% (2.0 = 200%, though may be capped at system max)
+                        await sound.setVolumeAsync(2.0);
 
-                    console.log(
-                        "Trainer voice played successfully at max volume"
-                    );
+                        await sound.playAsync();
+
+                        // Clean up after playback completes
+                        sound.setOnPlaybackStatusUpdate((status) => {
+                            if (status.isLoaded && status.didJustFinish) {
+                                sound.unloadAsync();
+                                // Optionally delete the temp file
+                                FileSystem.deleteAsync(audioFileUri, { idempotent: true });
+                            }
+                        });
+
+                        console.log(
+                            "Trainer voice played successfully at max volume"
+                        );
+                    } catch (error) {
+                        console.error("Error playing trainer voice:", error);
+                    }
+                };
+                reader.onerror = (error) => {
+                    console.error("FileReader error:", error);
+                };
+                reader.onerror = (error) => {
+                    console.error("FileReader error in trainer voice:", error);
                 };
                 reader.readAsDataURL(audioBlob);
             } catch (error) {
                 console.error("Failed to generate/play trainer voice:", error);
+                // Don't block the UI if trainer voice fails
             }
         };
 

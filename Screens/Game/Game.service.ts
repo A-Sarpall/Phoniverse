@@ -56,31 +56,32 @@ export const stitchMissionAudio = async (level: number) => {
     try {
         console.log(`Generating mission audio for level ${level}...`);
 
-        if (level === 1) {
-            // Generate TTS for the mission phrase with a longer tongue twister
-            console.log("Generating mission audio...");
-            const formData = new FormData();
-            formData.append(
-                "text",
-                "Repeat after me cadet!: Sally sells sea shells by the sea shore. She sells sea shells surely. The shells she sells are surely sea shells. So if she sells shells on the seashore, I'm sure she sells seashore shells."
-            );
+        const levelTexts = [
+            "Repeat after me cadet!: Sally sells sea shells by the sea shore. She sells sea shells surely. The shells she sells are surely sea shells. So if she sells shells on the seashore, I'm sure she sells seashore shells.",
+            "Repeat after me cadet!: Say these words: see, sip, sue.",
+            "Repeat after me cadet!: Now: past, list, fast, toast.",
+            "Repeat after me cadet!: Sam sings softly at sunrise.",
+            "Repeat after me cadet!: Sarah sells small seashells on the sunny shore.",
+        ];
 
-            const response = await fetch(`${SERVER_URL}/tts/generate`, {
-                method: "POST",
-                body: formData,
-            });
+        const text = levelTexts[level - 1] || levelTexts[0];
+        
+        console.log("Generating mission audio...");
+        const formData = new FormData();
+        formData.append("text", text);
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`TTS generation failed: ${errorText}`);
-            }
+        const response = await fetch(`${SERVER_URL}/tts/generate`, {
+            method: "POST",
+            body: formData,
+        });
 
-            // Return audio blob
-            return response.blob();
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`TTS generation failed: ${errorText}`);
         }
 
-        // Add more levels here
-        throw new Error(`Level ${level} not implemented yet`);
+        // Return audio blob
+        return response.blob();
     } catch (error) {
         console.error("Failed to generate mission audio:", error);
         throw error;

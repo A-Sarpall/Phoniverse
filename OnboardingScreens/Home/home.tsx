@@ -321,16 +321,16 @@ export default function HomePage({ route, navigation }: any) {
                     >
                         <Image source={item.source} style={styles.image} />
                         <TouchableOpacity
-                            disabled={item.number !== currentSpaceshipPosition} // 🔒 lock everything except current planet
+                            disabled={item.number > currentSpaceshipPosition + 1} // Allow current and next planet
                             style={[
                                 styles.numberLabel,
                                 item.number < currentSpaceshipPosition &&
                                     styles.completedLabel,
-                                item.number !== currentSpaceshipPosition &&
-                                    styles.lockedLabel, // lock all except current
+                                item.number > currentSpaceshipPosition + 1 &&
+                                    styles.lockedLabel, // lock planets more than one above current
                             ]}
                             onPress={() => {
-                                if (item.number === currentSpaceshipPosition) {
+                                if (item.number <= currentSpaceshipPosition + 1) {
                                     navigation.navigate("Game", {
                                         planetNumber: item.number,
                                     });
