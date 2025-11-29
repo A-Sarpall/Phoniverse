@@ -36,6 +36,7 @@ export const styles = StyleSheet.create({
         borderRadius: 12,
         width: "100%",
         alignItems: "center",
+        marginBottom: 40,
         shadowColor: "#000",
         shadowOpacity: 0.4,
         shadowOffset: { width: 0, height: 3 },

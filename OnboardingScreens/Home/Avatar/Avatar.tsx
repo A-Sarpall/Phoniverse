@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import {
     View,
     Text,
@@ -11,7 +11,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { AvatarContext, PointsContext } from "../../../App";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 // Image mapping for single items
 const singleItemImages: { [key: string]: any } = {
@@ -130,6 +130,22 @@ export default function Avatar() {
         useContext(AvatarContext);
     const navigation = useNavigation<any>();
 
+    // Generate stars for background
+    const stars = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < 100; i++) {
+            arr.push({
+                id: i,
+                x: Math.random() * screenWidth,
+                y: Math.random() * screenHeight,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.6 + 0.4,
+                color: Math.random() > 0.7 ? "#cce6ff" : "#ffffff",
+            });
+        }
+        return arr;
+    }, []);
+
     const handleItemSelect = (item: any) => {
         // If the item is already equipped, unequip it
         if (isItemEquipped(item.id)) {
@@ -178,6 +194,27 @@ export default function Avatar() {
 
     return (
         <View style={styles.container}>
+            {/* Stars Background */}
+            {stars.map((star) => (
+                <View
+                    key={star.id}
+                    style={{
+                        position: "absolute",
+                        left: star.x,
+                        top: star.y,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: star.size / 2,
+                        backgroundColor: star.color,
+                        opacity: star.opacity,
+                        shadowColor: star.color,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 2,
+                        elevation: 3,
+                    }}
+                />
+            ))}
             <Text style={styles.title}>👤 Avatar</Text>
             <Text style={styles.subtitle}>Customize your space explorer!</Text>
 

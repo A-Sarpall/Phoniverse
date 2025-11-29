@@ -122,25 +122,47 @@ def generate_clone(
     from io import BytesIO
 
     temp_path = None
+    audio_file = None
     try:
+        # Validate audio bytes
+        if not audio_bytes or len(audio_bytes) == 0:
+            raise ValueError("Audio bytes are empty")
+        
         # Create temporary file with .mp3 extension
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".mp3", mode="wb"
         ) as temp_file:
             temp_file.write(audio_bytes)
+            temp_file.flush()  # Ensure data is written to disk
+            os.fsync(temp_file.fileno())  # Force write to disk
             temp_path = temp_file.name
 
-        # Verify file exists
+        # Verify file exists and has content
         if not os.path.exists(temp_path):
             raise FileNotFoundError(f"Temp file not found: {temp_path}")
         
-        with open(temp_path, "rb") as audio_file:
-            voice = client.voices.ivc.create(
-                name=name,
-                files=[audio_file],
-                description=description,
-                remove_background_noise=False,  # Disabled to allow shorter recordings (min 4.6s required when enabled)
-            )
+        file_size = os.path.getsize(temp_path)
+        if file_size == 0:
+            raise ValueError(f"Temp file is empty: {temp_path}")
+        
+        # Open file and keep it open during API call
+        # Use binary mode and ensure it stays open
+        audio_file = open(temp_path, "rb")
+        
+        # Make sure file is readable
+        audio_file.seek(0)
+        
+        # Create voice clone - file handle must stay open during this call
+        voice = client.voices.ivc.create(
+            name=name,
+            files=[audio_file],
+            description=description,
+            remove_background_noise=False,  # Disabled to allow shorter recordings (min 4.6s required when enabled)
+        )
+        
+        # Close file after API call completes
+        audio_file.close()
+        audio_file = None
 
         return voice
 
@@ -152,6 +174,13 @@ def generate_clone(
         traceback.print_exc()
         raise
     finally:
+        # Close file handle if still open
+        if audio_file:
+            try:
+                audio_file.close()
+            except Exception:
+                pass
+        
         # Clean up temp file
         if temp_path and os.path.exists(temp_path):
             try:

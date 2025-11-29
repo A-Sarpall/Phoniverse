@@ -12,7 +12,7 @@ const Welcome = ({ navigation }: any) => {
             <GalaxyBackground />
             <View style={styles.content}>
                 <Text style={[styles.title, { color: theme.text }]}>
-                    Welcome to Phoniverse!!
+                    Welcome to Phoniverse!
                 </Text>
                 <Text style={[styles.subtitle, { color: theme.text }]}>
                     Overcome your speech impediments with <Text style={{fontWeight: 'bold', fontStyle: 'italic'}}>A</Text>L<Text style={{fontWeight: 'bold', fontStyle: 'italic'}}>I</Text>EN-powered speech therapy.

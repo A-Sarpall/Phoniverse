@@ -58,7 +58,7 @@ export const stitchMissionAudio = async (level: number) => {
 
         const levelTexts = [
             "Repeat after me cadet!: Sally sells sea shells by the sea shore. She sells sea shells surely. The shells she sells are surely sea shells. So if she sells shells on the seashore, I'm sure she sells seashore shells.",
-            "Repeat after me cadet!: Say these words: see, sip, sue.",
+            "Repeat after me cadet!: see, sip, sue",
             "Repeat after me cadet!: Now: past, list, fast, toast.",
             "Repeat after me cadet!: Sam sings softly at sunrise.",
             "Repeat after me cadet!: Sarah sells small seashells on the sunny shore.",

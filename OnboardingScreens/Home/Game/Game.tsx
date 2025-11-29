@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useState, useEffect } from "react";
+import React, { useContext, useLayoutEffect, useState, useEffect, useMemo } from "react";
 import {
     View,
     Text,
@@ -7,6 +7,7 @@ import {
     Image,
     Modal,
     ActivityIndicator,
+    Dimensions,
 } from "react-native";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,6 +22,8 @@ import { stitchMissionAudio, analyzeRecordingWithSSound } from "./Game.service";
 import { SERVER_URL } from "../../../config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+
 const Game = ({ navigation }: any) => {
     const route = useRoute();
     const planetNumber = (route.params as any)?.planetNumber || 1;
@@ -30,6 +33,22 @@ const Game = ({ navigation }: any) => {
     const [missionCompleted, setMissionCompleted] = useState(false);
     const [allowNavigation, setAllowNavigation] = useState(false); // Flag to control beforeRemove
     const theme = useContext(ThemeContext);
+
+    // Generate stars for background
+    const stars = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < 100; i++) {
+            arr.push({
+                id: i,
+                x: Math.random() * screenWidth,
+                y: Math.random() * screenHeight,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.6 + 0.4,
+                color: Math.random() > 0.7 ? "#cce6ff" : "#ffffff",
+            });
+        }
+        return arr;
+    }, []);
 
     const {
         isRecording,
@@ -102,7 +121,7 @@ const Game = ({ navigation }: any) => {
                     
                     const sound = new Audio.Sound();
                     await sound.loadAsync({ uri: audioFileUri });
-                    await sound.setVolumeAsync(2.0); // 200% volume
+                    await sound.setVolumeAsync(1.0); // 100% volume
                     await sound.playAsync();
                     
                     sound.setOnPlaybackStatusUpdate((status) => {
@@ -178,7 +197,7 @@ const Game = ({ navigation }: any) => {
                             
                             const sound = new Audio.Sound();
                             await sound.loadAsync({ uri: audioFileUri });
-                            await sound.setVolumeAsync(2.0); // 200% volume
+                            await sound.setVolumeAsync(1.0); // 100% volume
                             await sound.playAsync();
                             
                             sound.setOnPlaybackStatusUpdate((status) => {
@@ -246,8 +265,29 @@ const Game = ({ navigation }: any) => {
 
     return (
         <SafeAreaView
-            style={[styles.container, { backgroundColor: theme.background }]}
+            style={[styles.container, { backgroundColor: "#000" }]}
         >
+            {/* Stars Background */}
+            {stars.map((star) => (
+                <View
+                    key={star.id}
+                    style={{
+                        position: "absolute",
+                        left: star.x,
+                        top: star.y,
+                        width: star.size,
+                        height: star.size,
+                        borderRadius: star.size / 2,
+                        backgroundColor: star.color,
+                        opacity: star.opacity,
+                        shadowColor: star.color,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 2,
+                        elevation: 3,
+                    }}
+                />
+            ))}
             {/* Back Button */}
             <TouchableOpacity
                 style={styles.backButton}
@@ -464,6 +504,7 @@ const styles = StyleSheet.create({
     bottomContainer: {
         width: "100%",
         alignItems: "center",
+        paddingBottom: 40,
     },
     button: {
         paddingVertical: 16,
@@ -498,8 +539,8 @@ const styles = StyleSheet.create({
     },
     chatboxContainer: {
         position: "absolute",
-        top: "20%", // Moved down a bit
-        right: 10, // Moved to the right (positive value)
+        top: "-10%", // Above the alien's head
+        left: "12.5%", // Center horizontally (100% - 75%) / 2
         width: "75%",
         aspectRatio: 2,
         alignItems: "center",
@@ -600,7 +641,7 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         paddingHorizontal: 30,
         alignItems: "center",
-        marginBottom: 15,
+        marginBottom: 30,
         minWidth: 200,
         shadowColor: "#60359c",
         shadowOffset: {

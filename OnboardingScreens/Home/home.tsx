@@ -128,10 +128,14 @@ export default function HomePage({ route, navigation }: any) {
 
                         const currentCenterX =
                             currentX + planetSize / 2 - spaceshipSize / 2;
-                        const currentCenterY = currentY - 30;
+                        const currentCenterY = (completedFromParam === 2 || completedFromParam === 4) 
+                            ? currentY + 2 
+                            : currentY - 30;
                         const nextCenterX =
                             nextX + planetSize / 2 - spaceshipSize / 2;
-                        const nextCenterY = nextY - 30;
+                        const nextCenterY = (nextPosition === 2 || nextPosition === 4) 
+                            ? nextY + 2 
+                            : nextY - 30;
 
                         setIsSpaceshipTravelling(true);
                         Animated.timing(starIntensity, {
@@ -359,7 +363,10 @@ export default function HomePage({ route, navigation }: any) {
                                 <View
                                     style={[
                                         styles.spaceshipContainer,
-                                        { top: -30, left: 45 },
+                                        { 
+                                            top: (item.number === 2 || item.number === 4) ? -10 : -30, 
+                                            left: 45 
+                                        },
                                     ]}
                                 >
                                     <Image

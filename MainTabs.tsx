@@ -27,7 +27,9 @@ const MainTabs = () => {
                     borderTopWidth: 0,
                     elevation: 0,
                     shadowOpacity: 0,
-                    height: 60,
+                    height: 90,
+                    paddingTop: 10,
+                    paddingBottom: 20,
                 },
                 tabBarActiveTintColor: theme.button,
                 tabBarInactiveTintColor: "#aaa",
@@ -38,7 +40,7 @@ const MainTabs = () => {
                 component={HomePage}
                 options={{
                     tabBarIcon: ({ color }) => (
-                        <FontAwesomeIcon icon={faHome} size={20} color={color} />
+                        <FontAwesomeIcon icon={faHome} size={26} color={color} />
                     ),
                 }}
             />
@@ -47,7 +49,7 @@ const MainTabs = () => {
             {/*    component={Minigames}*/}
             {/*    options={{*/}
             {/*        tabBarIcon: ({ color }) => (*/}
-            {/*            <FontAwesomeIcon icon={faGamepad} size={20} color={color} />*/}
+            {/*            <FontAwesomeIcon icon={faGamepad} size={26} color={color} />*/}
             {/*        ),*/}
             {/*    }}*/}
             {/*/>*/}
@@ -56,7 +58,7 @@ const MainTabs = () => {
                 component={Avatar}
                 options={{
                     tabBarIcon: ({ color }) => (
-                        <FontAwesomeIcon icon={faUser} size={20} color={color} />
+                        <FontAwesomeIcon icon={faUser} size={26} color={color} />
                     ),
                 }}
             />
@@ -65,7 +67,7 @@ const MainTabs = () => {
                 component={Shop}
                 options={{
                     tabBarIcon: ({ color }) => (
-                        <FontAwesomeIcon icon={faStore} size={20} color={color} />
+                        <FontAwesomeIcon icon={faStore} size={26} color={color} />
                     ),
                 }}
             />

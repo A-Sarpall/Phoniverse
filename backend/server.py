@@ -389,11 +389,22 @@ async def create_voice_clone(
         # Read audio file
         audio_bytes = await audio_file.read()
 
+        if not audio_bytes or len(audio_bytes) == 0:
+            raise HTTPException(
+                status_code=400, detail="Audio file is empty or could not be read"
+            )
+
         logger.info(
             f"Received audio file: {audio_file.filename}, size: {len(audio_bytes)} bytes"
         )
+        
         # Create voice clone
         voice = generate_clone(audio_bytes, name=name, description=description)
+
+        if not voice or not hasattr(voice, "voice_id"):
+            raise HTTPException(
+                status_code=500, detail="Voice clone created but no voice_id returned"
+            )
 
         return {
             "voice_id": voice.voice_id,
@@ -401,9 +412,14 @@ async def create_voice_clone(
             "description": description,
             "status": "Voice clone created successfully",
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Voice cloning failed: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Voice cloning failed: {str(e)}")
+        error_msg = str(e)
+        logger.error(f"Voice cloning failed: {error_msg}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Voice cloning failed: {error_msg}")
 
 
 if __name__ == "__main__":

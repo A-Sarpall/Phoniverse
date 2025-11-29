@@ -59,7 +59,7 @@ const InitialAssessment = ({ navigation }: any) => {
                 );
 
                 const audioBlob = await createTrainerVoice(
-                    "Repeat this phrase loud and clear!:" +
+                    "Repeat this phrase loud and clear:" +
                         stringsToPronounce[0]
                 );
 
@@ -84,8 +84,8 @@ const InitialAssessment = ({ navigation }: any) => {
                         const sound = new Audio.Sound();
                         await sound.loadAsync({ uri: audioFileUri });
 
-                        // Set volume to 200% (2.0 = 200%, though may be capped at system max)
-                        await sound.setVolumeAsync(2.0);
+                        // Set volume to 100% (1.0 = 100%)
+                        await sound.setVolumeAsync(1.0);
 
                         await sound.playAsync();
 
@@ -171,7 +171,7 @@ const InitialAssessment = ({ navigation }: any) => {
 
     return (
         <SafeAreaView
-            style={[styles.container, { backgroundColor: theme.background }]}
+            style={[styles.container, { backgroundColor: "#000" }]}
         >
             {/* Stars Background */}
             {stars.map((star) => (
@@ -196,7 +196,7 @@ const InitialAssessment = ({ navigation }: any) => {
             ))}
             <View style={styles.topContainer}>
                 <Text style={styles.instructionText}>
-                    Repeat this phrase loud and clear!:
+                    Repeat this phrase loud and clear:
                 </Text>
                 <Text style={styles.sentenceText}>
                     "{stringsToPronounce[0]}"
@@ -205,7 +205,13 @@ const InitialAssessment = ({ navigation }: any) => {
 
             <View style={styles.middleContainer}>
                 <TouchableOpacity
-                    style={[styles.micButton, { backgroundColor: circleColor }]}
+                    style={[
+                        styles.micButton,
+                        {
+                            backgroundColor: isRecording ? "#dc3545" : circleColor,
+                            borderColor: isRecording ? "#dc3545" : "#8B5FBF",
+                        },
+                    ]}
                     activeOpacity={0.8}
                     onPress={handleBottomButtonPress}
                     disabled={isLoading}
